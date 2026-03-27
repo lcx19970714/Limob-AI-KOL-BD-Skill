@@ -1,20 +1,19 @@
 ---
-name: sales-automation-crm
+name: limob-ai-kol-bd-skill
 description: Run SOP-driven sales outreach, lead qualification, pipeline management, and lightweight CRM operations for B2B or influencer-BD teams. Use when Codex needs to triage new leads, assign A/B/C priority, generate outreach or follow-up messages, prepare demo or trial next steps, update customer records, or review a sales pipeline.
 ---
 
-# Sales Automation CRM
+# Limob AI KOL BD Skill
 
 Use this skill to act like a disciplined sales operator, not a generic copywriter.
 
 ## Start Here
 
 1. Read `references/sales-sop.md` when the task depends on stage logic, talk tracks, response times, objection handling, or qualification rules.
-2. Read `references/customer-schema.md` when the task involves the SQLite schema, Chinese database fields, pipeline fields, KPIs, or CRM updates.
+2. Read `references/customer-schema.md` when the task involves the sales schema, Chinese business fields, pipeline fields, KPIs, or CRM updates.
 3. Read `references/message-templates.md` when the task needs ready-to-send Chinese talk tracks.
-4. Use `scripts/crm_tracker.py` when the user wants to create, update, inspect, or summarize customer records stored in SQLite instead of only drafting text.
-5. Use `scripts/launch_dashboard.py` when the user wants one-click launch of the dashboard. It should automatically ensure the local API is running and then open the board.
-6. Use `scripts/dashboard_server.py` only when debugging the local dashboard service itself.
+4. Use `scripts/crm_tracker.py` when the user wants to create, update, inspect, search, sort, or summarize sales records through the backend CRM API instead of only drafting text.
+5. The visual dashboard lives in the CRM frontend, not inside the skill project.
 
 ## Operate By Workflow
 
@@ -29,7 +28,7 @@ Use this skill to act like a disciplined sales operator, not a generic copywrite
 4. If the user wants the lead stored, run:
 
 ```bash
-python scripts/crm_tracker.py add --company "Acme" --contact-name "Li Wei" --role "CMO" --source "Expo" --stage "first-chat" --grade "A" --next-action "Send 1-minute demo and lock a call" --next-action-date 2026-03-28
+python scripts/crm_tracker.py 新增 --客户名称 "Acme" --联系人姓名 "Li Wei" --联系角色 "CMO" --线索来源 "Expo" --当前阶段 "first-chat" --优先级 "A" --下一步动作 "发送1分钟演示并锁定会议" --下一步日期 2026-03-28
 ```
 
 5. Reply with:
@@ -58,7 +57,7 @@ Map every deliverable to the opportunity stage.
 - `first-chat`: clarify the biggest pain point before sending materials.
 - `qualification`: ask short, factual questions and surface decision-maker risk.
 - `demo`: tie the walkthrough to ROI, current workflow, and human-in-the-loop control.
-- `trial`: define one scenario, one product, one target pool, one owner, and three success metrics.
+- `trial`: define one scenario, one product, one target pool, one owner, and three concrete goals.
 - `quote`: translate value into version, scope, launch support, and expected return.
 - `contract`: confirm signer, invoice info, payment method, and target payment date.
 - `handoff`: summarize background, promises, trial result, and implementation targets.
@@ -74,9 +73,9 @@ For daily sales operations:
 Examples:
 
 ```bash
-python scripts/crm_tracker.py summary
-python scripts/crm_tracker.py list --due-on 2026-03-27
-python scripts/crm_tracker.py list --grade A --active-only
+python scripts/crm_tracker.py 汇总
+python scripts/crm_tracker.py 列表 --下一步日期 2026-03-27
+python scripts/crm_tracker.py 列表 --优先级 A --仅看活跃
 ```
 
 When reporting pipeline status, always include:
@@ -98,25 +97,35 @@ When reporting pipeline status, always include:
 
 ## Update Customer Records Carefully
 
-- Never leave a record without `stage`, `grade`, `next_action`, and `next_action_date`.
+- Never leave a record without `当前阶段`, `优先级`, `下一步动作`, and `下一步日期`.
 - Use ISO dates: `YYYY-MM-DD`.
 - Preserve history by adding interaction notes instead of overwriting context when possible.
 - If important fields are unknown, store `"unknown"` or leave them blank instead of inventing facts.
 
 ## Use the CRM Script
 
-The CRM script stores data in `data/sales.sqlite3` by default.
+The CRM script now stores data in the backend `销售系统` schema through API calls authenticated by a long-term token.
+The script reads its runtime config through the built-in configuration loader, so usage docs do not need to repeat environment switching details.
 
 Common commands:
 
 ```bash
-python scripts/crm_tracker.py add --company "Acme" --source "Inbound" --stage "qualification" --next-action "Book discovery call" --next-action-date 2026-03-29
-python scripts/crm_tracker.py update --id LEAD-0001 --decision-maker "Zhang San" --timeline-days 14 --grade A
-python scripts/crm_tracker.py touch --id LEAD-0001 --note "Client asked for ROI case study" --next-action "Send ROI case and confirm demo time" --next-action-date 2026-03-28
-python scripts/crm_tracker.py list --stage demo
-python scripts/crm_tracker.py summary
-python scripts/launch_dashboard.py
+python scripts/crm_tracker.py 登录
+python scripts/crm_tracker.py 新增 --客户名称 "Acme" --线索来源 "Inbound" --当前阶段 "qualification" --下一步动作 "预约需求沟通" --下一步日期 2026-03-29
+python scripts/crm_tracker.py 更新 --机会编号 OPP-0001 --联系人姓名 "张三" --预计推进天数 14 --优先级 A
+python scripts/crm_tracker.py 跟进 --机会编号 OPP-0001 --记录内容 "客户想先看 ROI 案例" --下一步动作 "发送 ROI 案例并确认 Demo 时间" --下一步日期 2026-03-28
+python scripts/crm_tracker.py 列表 --当前阶段 demo --排序字段 下一步日期 --排序方向 升序
+python scripts/crm_tracker.py 详情 --机会编号 OPP-0001
+python scripts/crm_tracker.py 客户列表 --搜索关键词 美妆 --排序字段 更新时间 --排序方向 降序
+python scripts/crm_tracker.py 联系人列表 --搜索关键词 王 --是否决策人 1 --排序字段 更新时间 --排序方向 降序
+python scripts/crm_tracker.py 汇总
 ```
+
+List query capabilities:
+
+- `列表` supports `--搜索关键词` `--当前阶段` `--优先级` `--内部负责人` `--下一步日期` `--下一步日期截止前` `--仅看活跃` `--排序字段` `--排序方向` `--页码` `--每页数量`
+- `客户列表` supports `--搜索关键词` `--产品类目` `--排序字段` `--排序方向` `--页码` `--每页数量`
+- `联系人列表` supports `--搜索关键词` `--客户编号` `--联系角色` `--是否决策人` `--排序字段` `--排序方向` `--页码` `--每页数量`
 
 ## Output Templates
 
@@ -140,7 +149,7 @@ Suggested message: {draft}
 Demo goal:
 Current workflow:
 Main bottleneck:
-Trial success metrics:
+Trial goals:
 Key decision-maker:
 Next step after demo:
 ```

@@ -1,213 +1,291 @@
 #!/usr/bin/env python3
-"""SQLite-backed sales CRM command line tool."""
+"""Backend-backed sales CRM command line tool."""
 
 from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 
-from sales_db import (
-    DEFAULT_DB_PATH,
-    机会转JSON,
-    机会转简表,
-    生成看板数据,
-    连接数据库,
-    查询机会列表,
-    查询汇总,
-    新增机会,
-    更新机会,
-    记录跟进,
-)
+from skill_api import 销售系统接口客户端
 
 
-def 添加通用字段(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--company")
-    parser.add_argument("--contact-name")
-    parser.add_argument("--role")
-    parser.add_argument("--source")
-    parser.add_argument("--category")
-    parser.add_argument("--team-size", type=int)
-    parser.add_argument("--current-collab-mode")
-    parser.add_argument("--monthly-outreach", type=int)
-    parser.add_argument("--decision-maker")
-    parser.add_argument("--is-decision-maker")
-    parser.add_argument("--stage")
-    parser.add_argument("--grade")
-    parser.add_argument("--pain-points")
-    parser.add_argument("--last-summary")
-    parser.add_argument("--customer-idea")
-    parser.add_argument("--timeline-days", type=int)
-    parser.add_argument("--success-metrics")
-    parser.add_argument("--owner")
-    parser.add_argument("--next-action")
-    parser.add_argument("--next-action-date")
-    parser.add_argument("--trialed")
-    parser.add_argument("--trial-status")
-    parser.add_argument("--trial-start-date")
-    parser.add_argument("--trial-end-date")
-    parser.add_argument("--quote-version")
-    parser.add_argument("--buyer-entity")
-    parser.add_argument("--notes")
+def 添加通用字段(参数解析器: argparse.ArgumentParser) -> None:
+    参数解析器.add_argument("--客户名称")
+    参数解析器.add_argument("--联系人姓名")
+    参数解析器.add_argument("--联系角色")
+    参数解析器.add_argument("--线索来源")
+    参数解析器.add_argument("--产品类目")
+    参数解析器.add_argument("--团队规模", type=int)
+    参数解析器.add_argument("--当前合作方式")
+    参数解析器.add_argument("--月建联量", type=int)
+    参数解析器.add_argument("--决策关系说明")
+    参数解析器.add_argument("--是否决策人")
+    参数解析器.add_argument("--当前阶段")
+    参数解析器.add_argument("--优先级")
+    参数解析器.add_argument("--核心痛点")
+    参数解析器.add_argument("--上次沟通摘要")
+    参数解析器.add_argument("--客户想法")
+    参数解析器.add_argument("--预计推进天数", type=int)
+    参数解析器.add_argument("--推进目标")
+    参数解析器.add_argument("--内部负责人")
+    参数解析器.add_argument("--下一步动作")
+    参数解析器.add_argument("--下一步日期")
+    参数解析器.add_argument("--是否已试用")
+    参数解析器.add_argument("--试用状态")
+    参数解析器.add_argument("--试用开始日期")
+    参数解析器.add_argument("--试用结束日期")
+    参数解析器.add_argument("--报价版本")
+    参数解析器.add_argument("--采购主体")
+    参数解析器.add_argument("--备注")
 
 
-def 设为必填(parser: argparse.ArgumentParser, 参数名列表: list[str]) -> None:
-    必填集合 = set(参数名列表)
-    for action in parser._actions:
-        if any(option in 必填集合 for option in action.option_strings):
-            action.required = True
+def 构建参数解析器() -> argparse.ArgumentParser:
+    参数解析器 = argparse.ArgumentParser(description="销售系统合作机会工具")
+    子命令解析器 = 参数解析器.add_subparsers(dest="命令", required=True)
+
+    新增解析器 = 子命令解析器.add_parser("新增", help="新增一条合作机会")
+    添加通用字段(新增解析器)
+    for 必填参数 in ["--客户名称", "--线索来源", "--当前阶段", "--下一步动作", "--下一步日期"]:
+        for 动作 in 新增解析器._actions:
+            if 必填参数 in 动作.option_strings:
+                动作.required = True
+
+    更新解析器 = 子命令解析器.add_parser("更新", help="更新合作机会")
+    更新解析器.add_argument("--机会编号", required=True)
+    更新解析器.add_argument("--自动评级", action="store_true")
+    添加通用字段(更新解析器)
+
+    跟进解析器 = 子命令解析器.add_parser("跟进", help="记录一次跟进")
+    跟进解析器.add_argument("--机会编号", required=True)
+    跟进解析器.add_argument("--记录内容", required=True)
+    跟进解析器.add_argument("--跟进结果")
+    跟进解析器.add_argument("--沟通方式")
+    跟进解析器.add_argument("--预约时间")
+    跟进解析器.add_argument("--当前阶段")
+    跟进解析器.add_argument("--优先级")
+    跟进解析器.add_argument("--下一步动作")
+    跟进解析器.add_argument("--下一步日期")
+    跟进解析器.add_argument("--上次沟通摘要")
+    跟进解析器.add_argument("--客户想法")
+
+    登录解析器 = 子命令解析器.add_parser("登录", help="登录并生成长效令牌")
+
+    列表解析器 = 子命令解析器.add_parser("列表", help="查看合作机会列表")
+    列表解析器.add_argument("--搜索关键词")
+    列表解析器.add_argument("--当前阶段")
+    列表解析器.add_argument("--优先级")
+    列表解析器.add_argument("--内部负责人")
+    列表解析器.add_argument("--下一步日期")
+    列表解析器.add_argument("--下一步日期截止前")
+    列表解析器.add_argument("--仅看活跃", action="store_true")
+    列表解析器.add_argument("--排序字段", default="下一步日期")
+    列表解析器.add_argument("--排序方向", default="升序")
+    列表解析器.add_argument("--页码", type=int, default=1)
+    列表解析器.add_argument("--每页数量", type=int, default=20)
+    列表解析器.add_argument("--输出JSON", action="store_true")
+
+    详情解析器 = 子命令解析器.add_parser("详情", help="查看单条合作机会详情")
+    详情解析器.add_argument("--机会编号", required=True)
+
+    客户列表解析器 = 子命令解析器.add_parser("客户列表", help="查看客户列表")
+    客户列表解析器.add_argument("--搜索关键词")
+    客户列表解析器.add_argument("--产品类目")
+    客户列表解析器.add_argument("--排序字段", default="更新时间")
+    客户列表解析器.add_argument("--排序方向", default="降序")
+    客户列表解析器.add_argument("--页码", type=int, default=1)
+    客户列表解析器.add_argument("--每页数量", type=int, default=20)
+    客户列表解析器.add_argument("--输出JSON", action="store_true")
+
+    联系人列表解析器 = 子命令解析器.add_parser("联系人列表", help="查看联系人列表")
+    联系人列表解析器.add_argument("--搜索关键词")
+    联系人列表解析器.add_argument("--客户编号")
+    联系人列表解析器.add_argument("--联系角色")
+    联系人列表解析器.add_argument("--是否决策人")
+    联系人列表解析器.add_argument("--排序字段", default="更新时间")
+    联系人列表解析器.add_argument("--排序方向", default="降序")
+    联系人列表解析器.add_argument("--页码", type=int, default=1)
+    联系人列表解析器.add_argument("--每页数量", type=int, default=20)
+    联系人列表解析器.add_argument("--输出JSON", action="store_true")
+
+    汇总解析器 = 子命令解析器.add_parser("汇总", help="查看汇总")
+    汇总解析器.add_argument("--今日")
+    汇总解析器.add_argument("--输出JSON", action="store_true")
+
+    return 参数解析器
 
 
-def 构建解析器() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="SQLite 版销售客户台账工具")
-    parser.add_argument("--db", default=str(DEFAULT_DB_PATH))
-
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    add_parser = subparsers.add_parser("add", help="新增一条销售机会")
-    添加通用字段(add_parser)
-    设为必填(add_parser, ["--company", "--source", "--stage", "--next-action", "--next-action-date"])
-
-    update_parser = subparsers.add_parser("update", help="更新销售机会字段")
-    update_parser.add_argument("--id", required=True)
-    update_parser.add_argument("--auto-grade", action="store_true")
-    添加通用字段(update_parser)
-
-    touch_parser = subparsers.add_parser("touch", help="记录一次跟进")
-    touch_parser.add_argument("--id", required=True)
-    touch_parser.add_argument("--note", required=True)
-    touch_parser.add_argument("--result")
-    touch_parser.add_argument("--channel")
-    touch_parser.add_argument("--meeting-at")
-    touch_parser.add_argument("--stage")
-    touch_parser.add_argument("--grade")
-    touch_parser.add_argument("--next-action")
-    touch_parser.add_argument("--next-action-date")
-    touch_parser.add_argument("--last-summary")
-    touch_parser.add_argument("--customer-idea")
-
-    list_parser = subparsers.add_parser("list", help="查看客户列表")
-    list_parser.add_argument("--stage")
-    list_parser.add_argument("--grade")
-    list_parser.add_argument("--owner")
-    list_parser.add_argument("--due-on")
-    list_parser.add_argument("--due-before")
-    list_parser.add_argument("--active-only", action="store_true")
-    list_parser.add_argument("--json", action="store_true")
-
-    summary_parser = subparsers.add_parser("summary", help="查看汇总")
-    summary_parser.add_argument("--today")
-    summary_parser.add_argument("--json", action="store_true")
-
-    dashboard_parser = subparsers.add_parser("dashboard-data", help="导出看板 API 数据")
-    dashboard_parser.add_argument("--stage")
-    dashboard_parser.add_argument("--grade")
-
-    return parser
-
-
-def 转换字段(args: argparse.Namespace) -> dict:
+def 构建请求体(参数: argparse.Namespace) -> dict:
     return {
-        "客户名称": args.company,
-        "联系人": args.contact_name,
-        "联系角色": args.role,
-        "线索来源": args.source,
-        "产品类目": args.category,
-        "团队规模": args.team_size,
-        "当前合作方式": args.current_collab_mode,
-        "月建联量": args.monthly_outreach,
-        "决策人": args.decision_maker,
-        "是否决策人": args.is_decision_maker,
-        "当前阶段": args.stage,
-        "优先级": args.grade,
-        "核心痛点": args.pain_points,
-        "上次沟通摘要": args.last_summary,
-        "客户想法": args.customer_idea,
-        "预计推进天数": args.timeline_days,
-        "成功指标": args.success_metrics,
-        "内部负责人": args.owner,
-        "下一步动作": args.next_action,
-        "下一步日期": args.next_action_date,
-        "是否已试用": args.trialed,
-        "试用状态": args.trial_status,
-        "试用开始日期": args.trial_start_date,
-        "试用结束日期": args.trial_end_date,
-        "报价版本": args.quote_version,
-        "采购主体": args.buyer_entity,
-        "备注": args.notes,
+        "客户名称": 参数.客户名称,
+        "联系人姓名": 参数.联系人姓名,
+        "联系角色": 参数.联系角色,
+        "线索来源": 参数.线索来源,
+        "产品类目": 参数.产品类目,
+        "团队规模": 参数.团队规模,
+        "当前合作方式": 参数.当前合作方式,
+        "月建联量": 参数.月建联量,
+        "决策关系说明": 参数.决策关系说明,
+        "是否决策人": 参数.是否决策人,
+        "当前阶段": 参数.当前阶段,
+        "优先级": 参数.优先级,
+        "核心痛点": 参数.核心痛点,
+        "上次沟通摘要": 参数.上次沟通摘要,
+        "客户想法": 参数.客户想法,
+        "预计推进天数": 参数.预计推进天数,
+        "推进目标": 参数.推进目标,
+        "内部负责人": 参数.内部负责人,
+        "下一步动作": 参数.下一步动作,
+        "下一步日期": 参数.下一步日期,
+        "是否已试用": 参数.是否已试用,
+        "试用状态": 参数.试用状态,
+        "试用开始日期": 参数.试用开始日期,
+        "试用结束日期": 参数.试用结束日期,
+        "报价版本": 参数.报价版本,
+        "采购主体": 参数.采购主体,
+        "备注": 参数.备注,
     }
 
 
+def 生成简要行(记录: dict) -> str:
+    return (
+        f"{记录.get('机会编号', '')} | {记录.get('客户名称', '')} | "
+        f"{记录.get('当前阶段名称') or 记录.get('当前阶段', '')} | "
+        f"{记录.get('优先级', '')} | {记录.get('下一步动作', '')} | "
+        f"{记录.get('下一步日期', '')}"
+    )
+
+
+def 生成客户简要行(记录: dict) -> str:
+    return (
+        f"{记录.get('客户编号', '')} | {记录.get('客户名称', '')} | "
+        f"{记录.get('产品类目', '')} | 联系人 {记录.get('联系人数量', 0)} | "
+        f"活跃机会 {记录.get('活跃合作机会数量', 0)}"
+    )
+
+
+def 生成联系人简要行(记录: dict) -> str:
+    决策标签 = "决策人" if 记录.get("是否决策人") == 1 else "普通联系人"
+    return (
+        f"{记录.get('联系人编号', '')} | {记录.get('联系人姓名', '')} | "
+        f"{记录.get('客户名称', '')} | {记录.get('联系角色', '')} | {决策标签}"
+    )
+
+
+def 输出分页结果(查询结果: dict, 行生成器) -> None:
+    for 记录 in 查询结果.get("列表", []):
+        print(行生成器(记录))
+    print(f"第 {查询结果.get('页码', 1)} 页 / 共 {查询结果.get('总页数', 1)} 页 / 合计 {查询结果.get('总数', 0)} 条")
+
+
 def main() -> None:
-    parser = 构建解析器()
-    args = parser.parse_args()
-    db_path = Path(args.db)
+    参数解析器 = 构建参数解析器()
+    参数 = 参数解析器.parse_args()
+    客户端 = 销售系统接口客户端()
 
-    with 连接数据库(db_path) as conn:
-        if args.command == "add":
-            记录 = 新增机会(conn, 转换字段(args))
-            print(机会转JSON(记录))
+    if 参数.命令 == "登录":
+        print(json.dumps(客户端.登录并刷新长效令牌(), ensure_ascii=False, indent=2))
+        return
+
+    if 参数.命令 == "新增":
+        print(json.dumps(客户端.创建合作机会(构建请求体(参数)), ensure_ascii=False, indent=2))
+        return
+
+    if 参数.命令 == "更新":
+        请求体 = 构建请求体(参数)
+        if 参数.自动评级:
+            请求体["自动评级"] = True
+        print(json.dumps(客户端.更新合作机会(参数.机会编号, 请求体), ensure_ascii=False, indent=2))
+        return
+
+    if 参数.命令 == "跟进":
+        请求体 = {
+            "记录内容": 参数.记录内容,
+            "跟进结果": 参数.跟进结果,
+            "沟通方式": 参数.沟通方式,
+            "预约时间": 参数.预约时间,
+            "当前阶段": 参数.当前阶段,
+            "优先级": 参数.优先级,
+            "下一步动作": 参数.下一步动作,
+            "下一步日期": 参数.下一步日期,
+            "上次沟通摘要": 参数.上次沟通摘要,
+            "客户想法": 参数.客户想法,
+        }
+        print(json.dumps(客户端.新增跟进记录(参数.机会编号, 请求体), ensure_ascii=False, indent=2))
+        return
+
+    if 参数.命令 == "列表":
+        查询结果 = 客户端.查询合作机会列表(
+            {
+                "搜索关键词": 参数.搜索关键词,
+                "当前阶段": 参数.当前阶段,
+                "优先级": 参数.优先级,
+                "内部负责人": 参数.内部负责人,
+                "下一步日期": 参数.下一步日期,
+                "下一步日期截止前": 参数.下一步日期截止前,
+                "仅看活跃": 参数.仅看活跃,
+                "排序字段": 参数.排序字段,
+                "排序方向": 参数.排序方向,
+                "页码": 参数.页码,
+                "每页数量": 参数.每页数量,
+            }
+        )
+        if 参数.输出JSON:
+            print(json.dumps(查询结果, ensure_ascii=False, indent=2))
             return
+        输出分页结果(查询结果, 生成简要行)
+        return
 
-        if args.command == "update":
-            记录 = 更新机会(conn, args.id, 转换字段(args), 自动推断优先级=args.auto_grade)
-            print(机会转JSON(记录))
+    if 参数.命令 == "详情":
+        详情 = 客户端.查询合作机会详情(参数.机会编号)
+        print(json.dumps(详情, ensure_ascii=False, indent=2))
+        return
+
+    if 参数.命令 == "客户列表":
+        查询结果 = 客户端.查询客户列表(
+            {
+                "搜索关键词": 参数.搜索关键词,
+                "产品类目": 参数.产品类目,
+                "排序字段": 参数.排序字段,
+                "排序方向": 参数.排序方向,
+                "页码": 参数.页码,
+                "每页数量": 参数.每页数量,
+            }
+        )
+        if 参数.输出JSON:
+            print(json.dumps(查询结果, ensure_ascii=False, indent=2))
             return
+        输出分页结果(查询结果, 生成客户简要行)
+        return
 
-        if args.command == "touch":
-            记录 = 记录跟进(
-                conn,
-                args.id,
-                记录内容=args.note,
-                跟进结果=args.result or "",
-                沟通方式=args.channel or "",
-                预约时间=args.meeting_at or "",
-                当前阶段=args.stage,
-                优先级=args.grade,
-                下一步动作=args.next_action,
-                下一步日期=args.next_action_date,
-                上次沟通摘要=args.last_summary,
-                客户想法=args.customer_idea,
-            )
-            print(机会转JSON(记录))
+    if 参数.命令 == "联系人列表":
+        查询结果 = 客户端.查询联系人列表(
+            {
+                "搜索关键词": 参数.搜索关键词,
+                "客户编号": 参数.客户编号,
+                "联系角色": 参数.联系角色,
+                "是否决策人": 参数.是否决策人,
+                "排序字段": 参数.排序字段,
+                "排序方向": 参数.排序方向,
+                "页码": 参数.页码,
+                "每页数量": 参数.每页数量,
+            }
+        )
+        if 参数.输出JSON:
+            print(json.dumps(查询结果, ensure_ascii=False, indent=2))
             return
+        输出分页结果(查询结果, 生成联系人简要行)
+        return
 
-        if args.command == "list":
-            记录列表 = 查询机会列表(
-                conn,
-                当前阶段=args.stage,
-                优先级=args.grade,
-                内部负责人=args.owner,
-                到期日期=args.due_on,
-                截止日期=args.due_before,
-                仅活跃=args.active_only,
-            )
-            if args.json:
-                print(json.dumps(记录列表, ensure_ascii=False, indent=2))
-                return
-            for 记录 in 记录列表:
-                print(机会转简表(记录))
-            print(f"合计 {len(记录列表)} 条")
+    if 参数.命令 == "汇总":
+        汇总 = 客户端.查询销售汇总(今日=参数.今日)
+        if 参数.输出JSON:
+            print(json.dumps(汇总, ensure_ascii=False, indent=2))
             return
-
-        if args.command == "summary":
-            汇总 = 查询汇总(conn, 今日日期=args.today)
-            if args.json:
-                print(json.dumps(汇总, ensure_ascii=False, indent=2))
-                return
-            print(f"在跟进机会: {汇总['活跃机会数']}")
-            print(f"阶段分布: {json.dumps(汇总['阶段分布'], ensure_ascii=False)}")
-            print(f"优先级分布: {json.dumps(汇总['优先级分布'], ensure_ascii=False)}")
-            print(f"今日到期: {汇总['今日到期数']}")
-            print(f"已逾期: {汇总['已逾期数']}")
-            return
-
-        if args.command == "dashboard-data":
-            数据 = 生成看板数据(conn, 当前阶段=args.stage, 优先级=args.grade)
-            print(json.dumps(数据, ensure_ascii=False, indent=2))
-            return
-
-    raise ValueError(f"不支持的命令: {args.command}")
+        print(f"在跟进合作机会: {汇总['活跃合作机会数']}")
+        print(f"阶段分布: {json.dumps(汇总['阶段分布统计'], ensure_ascii=False)}")
+        print(f"优先级分布: {json.dumps(汇总['优先级分布统计'], ensure_ascii=False)}")
+        print(f"今日到期: {汇总['今日到期数']}")
+        print(f"已逾期: {汇总['逾期数']}")
 
 
 if __name__ == "__main__":
