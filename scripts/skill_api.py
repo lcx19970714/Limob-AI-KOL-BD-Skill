@@ -57,34 +57,34 @@ class 销售系统接口客户端:
     def 创建合作机会(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities", 请求体=请求体)
 
-    def 更新合作机会(self, 合作机会id: str, 请求体: dict[str, Any]) -> dict[str, Any]:
+    def 更新合作机会(self, 合作机会id: int, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities/update", 请求体={"合作机会id": 合作机会id, **请求体})
 
-    def 删除合作机会(self, 合作机会id: str) -> dict[str, Any]:
+    def 删除合作机会(self, 合作机会id: int) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities/delete", 请求体={"合作机会id": 合作机会id})
 
-    def 新增跟进记录(self, 合作机会id: str, 请求体: dict[str, Any]) -> dict[str, Any]:
+    def 新增跟进记录(self, 合作机会id: int, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities/touch", 请求体={"合作机会id": 合作机会id, **请求体})
 
     def 查询合作机会列表(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities/query", 请求体=请求体)
 
-    def 查询合作机会详情(self, 合作机会id: str) -> dict[str, Any]:
+    def 查询合作机会详情(self, 合作机会id: int) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities/detail", 请求体={"合作机会id": 合作机会id})
 
     def 创建客户(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/customers", 请求体=请求体)
 
-    def 更新客户(self, 客户id: str, 请求体: dict[str, Any]) -> dict[str, Any]:
+    def 更新客户(self, 客户id: int, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/customers/update", 请求体={"客户id": 客户id, **请求体})
 
-    def 删除客户(self, 客户id: str) -> dict[str, Any]:
+    def 删除客户(self, 客户id: int) -> dict[str, Any]:
         return self._发送请求("/sales-system/customers/delete", 请求体={"客户id": 客户id})
 
     def 查询客户列表(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/customers/query", 请求体=请求体)
 
-    def 查询客户详情(self, 客户id: str) -> dict[str, Any]:
+    def 查询客户详情(self, 客户id: int) -> dict[str, Any]:
         return self._发送请求("/sales-system/customers/detail", 请求体={"客户id": 客户id})
 
     def 创建联系人(self, 请求体: dict[str, Any]) -> dict[str, Any]:

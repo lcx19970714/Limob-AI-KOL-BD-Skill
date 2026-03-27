@@ -35,7 +35,7 @@ from 日期工具 import 标准化参数日期字段
 ]
 
 客户字段列表 = ["客户名称", "产品类目", "团队规模", "当前合作方式", "月建联量", "采购主体"]
-联系人字段列表 = ["客户id", "联系人姓名", "联系角色", "是否决策人", "决策关系说明"]
+联系人字段列表 = ["客户id", "联系人姓名", "微信号", "手机号", "联系角色", "是否决策人", "决策关系说明"]
 
 机会列表查询字段 = [
     "合作机会id",
@@ -54,11 +54,10 @@ from 日期工具 import 标准化参数日期字段
     "每页数量",
 ]
 客户列表查询字段 = ["客户id", "客户名称", "搜索关键词", "产品类目", "排序字段", "排序方向", "页码", "每页数量"]
-联系人列表查询字段 = ["联系人id", "联系人姓名", "搜索关键词", "客户id", "联系角色", "是否决策人", "排序字段", "排序方向", "页码", "每页数量"]
-
+联系人列表查询字段 = ["联系人id", "联系人姓名", "微信号", "手机号", "搜索关键词", "客户id", "联系角色", "是否决策人", "排序字段", "排序方向", "页码", "每页数量"]
 
 def 添加机会字段(参数解析器: argparse.ArgumentParser) -> None:
-    参数解析器.add_argument("--客户id")
+    参数解析器.add_argument("--客户id", type=int)
     参数解析器.add_argument("--联系人id", type=int)
     参数解析器.add_argument("--线索来源")
     参数解析器.add_argument("--当前阶段")
@@ -89,8 +88,10 @@ def 添加客户字段(参数解析器: argparse.ArgumentParser) -> None:
 
 
 def 添加联系人字段(参数解析器: argparse.ArgumentParser) -> None:
-    参数解析器.add_argument("--客户id")
+    参数解析器.add_argument("--客户id", type=int)
     参数解析器.add_argument("--联系人姓名")
+    参数解析器.add_argument("--微信号")
+    参数解析器.add_argument("--手机号")
     参数解析器.add_argument("--联系角色")
     参数解析器.add_argument("--是否决策人")
     参数解析器.add_argument("--决策关系说明")
@@ -112,15 +113,15 @@ def 构建参数解析器() -> argparse.ArgumentParser:
                 动作.required = True
 
     机会更新解析器 = 子命令解析器.add_parser("机会更新", help="更新合作机会")
-    机会更新解析器.add_argument("--合作机会id", required=True)
+    机会更新解析器.add_argument("--合作机会id", required=True, type=int)
     机会更新解析器.add_argument("--自动评级", action="store_true")
     添加机会字段(机会更新解析器)
 
     机会删除解析器 = 子命令解析器.add_parser("机会删除", help="删除合作机会")
-    机会删除解析器.add_argument("--合作机会id", required=True)
+    机会删除解析器.add_argument("--合作机会id", required=True, type=int)
 
     机会跟进解析器 = 子命令解析器.add_parser("机会跟进", help="记录合作机会跟进")
-    机会跟进解析器.add_argument("--合作机会id", required=True)
+    机会跟进解析器.add_argument("--合作机会id", required=True, type=int)
     机会跟进解析器.add_argument("--记录内容", required=True)
     机会跟进解析器.add_argument("--跟进结果")
     机会跟进解析器.add_argument("--沟通方式")
@@ -133,8 +134,8 @@ def 构建参数解析器() -> argparse.ArgumentParser:
     机会跟进解析器.add_argument("--客户想法")
 
     机会列表解析器 = 子命令解析器.add_parser("机会列表", help="查看合作机会列表")
-    机会列表解析器.add_argument("--合作机会id")
-    机会列表解析器.add_argument("--客户id")
+    机会列表解析器.add_argument("--合作机会id", type=int)
+    机会列表解析器.add_argument("--客户id", type=int)
     机会列表解析器.add_argument("--联系人id", type=int)
     机会列表解析器.add_argument("--搜索关键词")
     机会列表解析器.add_argument("--当前阶段")
@@ -150,23 +151,23 @@ def 构建参数解析器() -> argparse.ArgumentParser:
     机会列表解析器.add_argument("--输出JSON", action="store_true")
 
     机会详情解析器 = 子命令解析器.add_parser("机会详情", help="查看合作机会详情")
-    机会详情解析器.add_argument("--合作机会id", required=True)
+    机会详情解析器.add_argument("--合作机会id", required=True, type=int)
 
     客户新增解析器 = 子命令解析器.add_parser("客户新增", help="新增客户")
     添加客户字段(客户新增解析器)
 
     客户更新解析器 = 子命令解析器.add_parser("客户更新", help="更新客户")
-    客户更新解析器.add_argument("--客户id", required=True)
+    客户更新解析器.add_argument("--客户id", required=True, type=int)
     添加客户字段(客户更新解析器)
 
     客户删除解析器 = 子命令解析器.add_parser("客户删除", help="删除客户")
-    客户删除解析器.add_argument("--客户id", required=True)
+    客户删除解析器.add_argument("--客户id", required=True, type=int)
 
     客户详情解析器 = 子命令解析器.add_parser("客户详情", help="查看客户详情")
-    客户详情解析器.add_argument("--客户id", required=True)
+    客户详情解析器.add_argument("--客户id", required=True, type=int)
 
     客户列表解析器 = 子命令解析器.add_parser("客户列表", help="查看客户列表")
-    客户列表解析器.add_argument("--客户id")
+    客户列表解析器.add_argument("--客户id", type=int)
     客户列表解析器.add_argument("--客户名称")
     客户列表解析器.add_argument("--搜索关键词")
     客户列表解析器.add_argument("--产品类目")
@@ -196,8 +197,10 @@ def 构建参数解析器() -> argparse.ArgumentParser:
     联系人列表解析器 = 子命令解析器.add_parser("联系人列表", help="查看联系人列表")
     联系人列表解析器.add_argument("--联系人id", type=int)
     联系人列表解析器.add_argument("--联系人姓名")
+    联系人列表解析器.add_argument("--微信号")
+    联系人列表解析器.add_argument("--手机号")
     联系人列表解析器.add_argument("--搜索关键词")
-    联系人列表解析器.add_argument("--客户id")
+    联系人列表解析器.add_argument("--客户id", type=int)
     联系人列表解析器.add_argument("--联系角色")
     联系人列表解析器.add_argument("--是否决策人")
     联系人列表解析器.add_argument("--排序字段", default="更新时间")
@@ -240,9 +243,10 @@ def 生成客户简要行(记录: dict[str, Any]) -> str:
 
 def 生成联系人简要行(记录: dict[str, Any]) -> str:
     决策标签 = "决策人" if str(记录.get("是否决策人", "")) == "1" else "普通联系人"
+    唯一身份 = 记录.get("微信号") or 记录.get("手机号") or "-"
     return (
         f"{记录.get('联系人id', '')} | {记录.get('联系人姓名', '')} | "
-        f"{记录.get('客户名称', '')} | {记录.get('联系角色', '')} | {决策标签}"
+        f"{记录.get('客户名称', '')} | {唯一身份} | {记录.get('联系角色', '')} | {决策标签}"
     )
 
 

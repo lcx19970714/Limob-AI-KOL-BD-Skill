@@ -1,91 +1,68 @@
-# Sales SOP Reference
+# 销售标准作业流程
 
-## Stage Map
+## 一、阶段总览
 
-| Stage | Goal | What to do | Time limit | Exit standard |
-| --- | --- | --- | --- | --- |
-| `lead-inbox` | Turn a raw lead into a real opportunity | Capture source, company, role, category, team size, current collaboration mode, monthly outreach volume, and whether the contact is a decision-maker. Assign A/B/C and record the next move. | Same day | Graded and has next action |
-| `expo-touch` | Spark interest and move to WeChat or next step | Keep it short. The only goals are adding WeChat and booking a demo. | On site | Added on WeChat or confirmed no need |
-| `first-chat` | Identify the real pain point fast | Reply within 30 minutes and confirm which step they most want to solve before sending material. | Within 30 minutes | Prospect keeps talking or books a call |
-| `qualification` | Decide if demo or trial is worth it | Confirm product category, influencer volume, current workflow, pain point, decision-maker, and timeline. | 15 minutes | Scenario, decision-maker, and timeline are clear |
-| `discovery` | Translate needs into a trialable plan | Break the process into creator sourcing, contact data, conversation, seeding, go-live, and review. | One session | Notes captured and trial KPIs defined |
-| `demo` | Prove the product can execute | Use a fixed structure: 5 minutes on ROI, 15 minutes on scenario, 10 minutes on rollout and controls. | 30 minutes | Prospect acknowledges value and wants trial or quote |
-| `trial` | Turn trial into pre-close validation | Limit scope to one scenario, one product, one creator pool, one owner, and clear KPIs. | Launch in 24 hours | Trial officially starts |
-| `trial-follow-up` | Prove value and clear objections | Follow up on D2, D4, D7. Each touch should have one result and one next step. | Every 2-3 days | Moves to quote or procurement |
-| `quote` | Convert value into a buyable package | Quote version, scope, launch support, and expected return. Avoid leading with the cheapest price. | Within 24 hours | Version and buyer entity confirmed |
-| `contract` | Convert verbal intent into payment | Send contract on the same day once version, price, and buyer entity are clear. Confirm signer, invoice details, and payment method. | Same day | Contract signed and first payment received |
-| `handoff` | Prevent post-close drop-off | Sync customer background, committed scope, trial result, and rollout rhythm. | Same day or next day | Delivery team is fully briefed |
+| 阶段名称 | 阶段目标 | 动作要求 | 时限 | 出口标准 |
+| --- | --- | --- | --- | --- | --- |
+| 线索入库 | 把原始线索转成可推进机会 | 记录来源、客户信息、联系人信息、优先级、下一步动作和日期 | 当天 | 已分级且有下一步 |
+| 展会首触达 | 建立初次兴趣并转入微信或演示 | 短句沟通，目标只放在“加微信 + 约演示” | 现场 | 已加微信或明确不需要 |
+| 入站首聊 | 快速确认核心痛点 | 30 分钟内回复，先确认要解决的首要问题 | 30 分钟内 | 愿意继续沟通或已约沟通 |
+| 资格判断 | 判断是否值得进入演示/试用 | 确认场景、决策链、预算与时间窗口 | 15 分钟内 | 场景和决策链清晰 |
+| 需求沟通 | 把需求翻译成可执行方案 | 拆成找达人、触达、跟进、寄样/上播、复盘等环节 | 单次会议内 | 输出可试用方案 |
+| 产品演示 | 证明系统能执行 | 固定结构：价值结果 -> 场景流程 -> 风险控制 | 30 分钟内 | 认可价值并愿意试用/报价 |
+| 试用启动 | 把试用变成成交验证 | 限定一个场景、一个产品、一个目标池、一个负责人 | 24 小时内启动 | 试用正式开始 |
+| 试用跟进 | 用结果推动下一步 | 每次跟进只保留一个结果和一个下一步 | 每 2-3 天 | 进入报价或采购流程 |
+| 报价推进 | 把价值转成可采购方案 | 明确版本、范围、上线支持、预期收益 | 24 小时内 | 版本与采购主体确认 |
+| 合同打款 | 把口头意向转成回款 | 当天发合同，确认签署人、开票与付款节点 | 当天 | 合同签署并回首款 |
+| 成交交接 | 防止成交后掉线 | 同步客户背景、承诺范围、试用结果、上线节奏 | 当天或次日 | 交付团队完整接手 |
+| 已成交 | 沉淀可复制打法 | 记录成单关键动作和决策路径 | 当周 | 有可复用复盘 |
+| 已丢单 | 形成丢单复盘 | 记录真实丢单原因和改进动作 | 当周 | 有明确改进项 |
 
-## Qualification Questions
+## 二、资格判断问题（标准五问）
 
-1. 谁在做达人 BD？
+1. 现在是谁在负责达人商务推进？
 2. 每月大概触达多少达人？
-3. 最卡找达人、建联、跟进，还是寄样/上播管理？
-4. 如果 14 天后有效，最想看到哪 3 个指标变化？
-5. 这件事谁拍板？预计什么时候能推进？
+3. 当前最卡的是找达人、建联、跟进，还是寄样/上播管理？
+4. 如果 14 天后有效，最希望看到哪 3 个指标变化？
+5. 这件事谁拍板，预计什么时候能推进到试用或采购？
 
-## Talk Tracks
+## 三、每日节奏
 
-### Expo 10-second opener
-
-你们现在达人建联主要靠人工，还是已经自动化？
-
-### Expo 30-second intro
-
-我们不是群发工具，也不是简单插件，是能像员工一样执行达人 BD 的 AI 系统，可以自动找达人、自动触达、自动跟进。加个微信，我发你 1 分钟演示。
-
-### Inbound first response
-
-看到你加我，想先确认下你们现在最想解决的是找达人、触达、跟进，还是寄样/上播管理？我按你们场景给你发最相关内容。
-
-### Demo framing
-
-我们不是只给建议，而是把重复动作直接交给 AI 执行；你的人只保留关键判断和决策。
-
-### Trial framing
-
-这次试用不是随便体验，而是用你们真实业务跑一遍。我们只盯 3 个结果：触达量、有效回复、推进率/节省时间。
-
-### Quote framing
-
-先不急着比软件价格，先看这部分重复动作现在每月吃掉你们多少人力；正式版是把这部分稳定交给系统。
-
-### Contract framing
-
-我今天把合同和付款信息一起发你，避免流程来回拖；你们确认盖章和付款节点后，我这边就排上线。
-
-## Daily Cadence
-
-| Time | Action | Standard |
+| 时间段 | 动作 | 标准 |
 | --- | --- | --- |
-| 09:00-09:20 | Review pipeline, trial, quote, contract | Every live opportunity has next action plus date |
-| 09:20-10:30 | Add new leads and process inbound | Every new lead is graded and first touched |
-| 10:30-11:30 | Follow up old leads | A leads same day, B leads within 48 hours |
-| 14:00-16:00 | Discovery, demo, or trial review | Send notes and next step within 30 minutes |
-| 16:00-17:00 | Push trial, quote, contract, payment | At least one close-moving action done |
-| 17:00-17:20 | Review day | Record one sales insight and one product suggestion |
+| 09:00-09:20 | 查看管道与今日任务 | 每条活跃机会都有下一步动作和日期 |
+| 09:20-10:30 | 处理新线索与入站咨询 | 每条新线索都完成分级与首触达 |
+| 10:30-11:30 | 跟进历史线索 | A 类当日跟进，B 类 48 小时内跟进 |
+| 14:00-16:00 | 需求沟通/演示/试用复盘 | 会后 30 分钟内发纪要和下一步 |
+| 16:00-17:00 | 推进试用、报价、合同、回款 | 至少完成一个“向成交推进”的动作 |
+| 17:00-17:20 | 日终复盘 | 输出 1 条销售洞察 + 1 条产品建议 |
 
-## Weekly Targets
+## 四、每周目标（可按团队调整）
 
-- New qualified leads: `50`
-- Discovery or demos: `8-10`
-- Trial launches: `3-5`
-- Quotes sent: `2-3`
-- Deals or first payments: `1-2`
+- 有效新线索：`50`
+- 需求沟通或演示：`8-10`
+- 试用启动：`3-5`
+- 发出报价：`2-3`
+- 成交或首款：`1-2`
 
-## Objection Handling
+## 五、异议处理原则
 
-| Objection | Recommended response |
+| 异议 | 处理原则 |
 | --- | --- |
-| 已经有 CRM / 插件 | 你们现有工具更偏管理和记录，我们做的是直接执行，把找达人、触达、跟进这些重复动作交给系统。 |
-| 担心不稳定 / 怕失控 | 先从半自动开始，关键节点人工确认；等你们确认结果稳定，再放大自动化比例。 |
-| 产品是不是还不够成熟 | 不先谈“完美”，先谈一个真实场景能不能跑通。我们先用 7-14 天试用，把一个结果做出来。 |
-| 价格有点高 | 先不比软件价格，先算现在人工 BD 每月要耗掉多少人天；如果正式版把这部分稳定接过去，ROI 就出来了。 |
+| 已有 CRM / 插件 | 明确区分“记录管理”和“执行动作”：我们负责自动执行找达人、触达、跟进 |
+| 担心不稳定 | 先走半自动，关键节点人工确认，稳定后再逐步放大自动化比例 |
+| 担心系统不成熟 | 不讨论“是否完美”，先讨论“一个真实场景能否跑通并拿到结果” |
+| 价格偏高 | 先算当前人力成本与机会成本，再对比系统替代后的投入产出比 |
 
-## Lead Grades
+## 六、优先级标准
 
-| Grade | Standard |
+| 优先级 | 标准 |
 | --- | --- |
-| `A` | Clear use case, has decision-maker or strong influencer, can trial or buy within 1 month |
-| `B` | Real need, but timing is not ready |
-| `C` | Only learning, no clear project |
+| `A` | 场景明确、决策链清晰、30 天内可试用或采购 |
+| `B` | 需求真实，但时机或决策链未完全成熟 |
+| `C` | 仅了解阶段，短期无明确推进计划 |
+
+## 七、与话术模板的分工
+
+- 本文件只定义流程、节奏、判断标准。
+- 具体可发送话术统一使用 `references/message-templates.md`，避免重复维护。

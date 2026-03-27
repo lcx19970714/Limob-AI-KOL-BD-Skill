@@ -1,7 +1,7 @@
 interface:
   display_name: "Limob AI KOL BD Skill"
   short_description: "SOP-driven sales ops with outreach, pipeline, and CRM tracking."
-  default_prompt: "使用 $limob-ai-kol-bd-skill 时仅使用显式 CRM 命令（机会/客户/联系人），禁止通用别名与兼容兜底写法。"
+  default_prompt: "使用 $limob-ai-kol-bd-skill 时，用户自然聊天也要自动落 CRM：先搜索去重，再新增或更新；联系人按微信号/手机号/姓名顺序识别唯一身份，禁止兼容兜底写法。"
 
 policy:
   allow_implicit_invocation: true
