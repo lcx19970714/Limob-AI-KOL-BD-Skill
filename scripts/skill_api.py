@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Thin backend client for the sales system."""
+"""销售系统后端接口客户端。"""
 
 from __future__ import annotations
 
@@ -13,10 +13,10 @@ from skill_config import load_skill_config
 
 class 销售系统接口客户端:
     def __init__(self) -> None:
-        self.config = load_skill_config()
-        self.base_url = self.config["resolved_base_url"]
-        self.timeout = float(self.config.get("timeout_seconds", 20))
-        self.long_term_token = str(self.config.get("long_term_token") or "")
+        配置 = load_skill_config()
+        self.base_url = str(配置["resolved_base_url"]).rstrip("/")
+        self.timeout = float(配置.get("timeout_seconds", 20))
+        self.long_term_token = str(配置.get("long_term_token") or "")
 
     def _构建请求头(self) -> dict[str, str]:
         请求头 = {"Content-Type": "application/json"}
@@ -31,8 +31,7 @@ class 销售系统接口客户端:
         请求地址 = f"{self.base_url}{路径}"
         请求数据 = None
         if 请求体 is not None:
-            请求体数据 = {key: value for key, value in 请求体.items() if value is not None}
-            请求数据 = json.dumps(请求体数据, ensure_ascii=False).encode("utf-8")
+            请求数据 = json.dumps({k: v for k, v in 请求体.items() if v is not None}, ensure_ascii=False).encode("utf-8")
 
         请求对象 = urllib.request.Request(
             url=请求地址,
@@ -43,23 +42,26 @@ class 销售系统接口客户端:
 
         try:
             with urllib.request.urlopen(请求对象, timeout=self.timeout) as 响应:
-                解析结果 = json.loads(响应.read().decode("utf-8"))
+                结果 = json.loads(响应.read().decode("utf-8"))
         except urllib.error.HTTPError as exc:
             响应文本 = exc.read().decode("utf-8", errors="ignore")
             try:
-                解析结果 = json.loads(响应文本)
+                结果 = json.loads(响应文本)
             except json.JSONDecodeError as error:
                 raise RuntimeError(f"后端请求失败: HTTP {exc.code}") from error
 
-        if 解析结果.get("status") != 100:
-            raise RuntimeError(解析结果.get("message") or "后端请求失败")
-        return 解析结果.get("data", {})
+        if 结果.get("status") != 100:
+            raise RuntimeError(结果.get("message") or "后端请求失败")
+        return 结果.get("data", {})
 
     def 创建合作机会(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities", 请求体=请求体)
 
     def 更新合作机会(self, 机会编号: str, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities/update", 请求体={"机会编号": 机会编号, **请求体})
+
+    def 删除合作机会(self, 机会编号: str) -> dict[str, Any]:
+        return self._发送请求("/sales-system/opportunities/delete", 请求体={"机会编号": 机会编号})
 
     def 新增跟进记录(self, 机会编号: str, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities/touch", 请求体={"机会编号": 机会编号, **请求体})
@@ -70,11 +72,38 @@ class 销售系统接口客户端:
     def 查询合作机会详情(self, 机会编号: str) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities/detail", 请求体={"机会编号": 机会编号})
 
+    def 创建客户(self, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/customers", 请求体=请求体)
+
+    def 更新客户(self, 客户编号: str, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/customers/update", 请求体={"客户编号": 客户编号, **请求体})
+
+    def 删除客户(self, 客户编号: str) -> dict[str, Any]:
+        return self._发送请求("/sales-system/customers/delete", 请求体={"客户编号": 客户编号})
+
     def 查询客户列表(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/customers/query", 请求体=请求体)
+
+    def 查询客户详情(self, 客户编号: str) -> dict[str, Any]:
+        return self._发送请求("/sales-system/customers/detail", 请求体={"客户编号": 客户编号})
+
+    def 创建联系人(self, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/contacts", 请求体=请求体)
+
+    def 更新联系人(self, 联系人编号: int, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/contacts/update", 请求体={"联系人编号": 联系人编号, **请求体})
+
+    def 删除联系人(self, 联系人编号: int) -> dict[str, Any]:
+        return self._发送请求("/sales-system/contacts/delete", 请求体={"联系人编号": 联系人编号})
 
     def 查询联系人列表(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/contacts/query", 请求体=请求体)
 
+    def 查询联系人详情(self, 联系人编号: int) -> dict[str, Any]:
+        return self._发送请求("/sales-system/contacts/detail", 请求体={"联系人编号": 联系人编号})
+
     def 查询销售汇总(self, *, 今日: str | None = None) -> dict[str, Any]:
         return self._发送请求("/sales-system/summary", 请求体={"今日": 今日})
+
+    def 查询销售看板(self, *, 当前阶段: str | None = None, 优先级: str | None = None) -> dict[str, Any]:
+        return self._发送请求("/sales-system/dashboard", 请求体={"当前阶段": 当前阶段, "优先级": 优先级})
