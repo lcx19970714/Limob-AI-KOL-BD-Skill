@@ -14,16 +14,9 @@ from skill_config import 写入长效令牌
 from 日期工具 import 标准化参数日期字段
 
 机会字段列表 = [
-    "客户名称",
-    "联系人姓名",
-    "联系角色",
+    "客户编号",
+    "联系人编号",
     "线索来源",
-    "产品类目",
-    "团队规模",
-    "当前合作方式",
-    "月建联量",
-    "决策关系说明",
-    "是否决策人",
     "当前阶段",
     "优先级",
     "核心痛点",
@@ -38,7 +31,6 @@ from 日期工具 import 标准化参数日期字段
     "试用开始日期",
     "试用结束日期",
     "报价版本",
-    "采购主体",
     "备注",
 ]
 
@@ -47,6 +39,8 @@ from 日期工具 import 标准化参数日期字段
 
 机会列表查询字段 = [
     "机会编号",
+    "客户编号",
+    "联系人编号",
     "搜索关键词",
     "当前阶段",
     "优先级",
@@ -64,16 +58,9 @@ from 日期工具 import 标准化参数日期字段
 
 
 def 添加机会字段(参数解析器: argparse.ArgumentParser) -> None:
-    参数解析器.add_argument("--客户名称")
-    参数解析器.add_argument("--联系人姓名")
-    参数解析器.add_argument("--联系角色")
+    参数解析器.add_argument("--客户编号")
+    参数解析器.add_argument("--联系人编号", type=int)
     参数解析器.add_argument("--线索来源")
-    参数解析器.add_argument("--产品类目")
-    参数解析器.add_argument("--团队规模", type=int)
-    参数解析器.add_argument("--当前合作方式")
-    参数解析器.add_argument("--月建联量", type=int)
-    参数解析器.add_argument("--决策关系说明")
-    参数解析器.add_argument("--是否决策人")
     参数解析器.add_argument("--当前阶段")
     参数解析器.add_argument("--优先级")
     参数解析器.add_argument("--核心痛点")
@@ -88,12 +75,12 @@ def 添加机会字段(参数解析器: argparse.ArgumentParser) -> None:
     参数解析器.add_argument("--试用开始日期", help="支持多种日期格式")
     参数解析器.add_argument("--试用结束日期", help="支持多种日期格式")
     参数解析器.add_argument("--报价版本")
-    参数解析器.add_argument("--采购主体")
     参数解析器.add_argument("--备注")
 
 
 def 添加客户字段(参数解析器: argparse.ArgumentParser) -> None:
     参数解析器.add_argument("--客户名称")
+    参数解析器.add_argument("--联系人姓名", help="客户名称未知时可用于代替客户名称")
     参数解析器.add_argument("--产品类目")
     参数解析器.add_argument("--团队规模", type=int)
     参数解析器.add_argument("--当前合作方式")
@@ -119,7 +106,7 @@ def 构建参数解析器() -> argparse.ArgumentParser:
 
     机会新增解析器 = 子命令解析器.add_parser("机会新增", help="新增合作机会")
     添加机会字段(机会新增解析器)
-    for 必填参数 in ["--客户名称", "--线索来源", "--当前阶段", "--下一步动作", "--下一步日期"]:
+    for 必填参数 in ["--客户编号", "--线索来源", "--当前阶段", "--下一步动作", "--下一步日期"]:
         for 动作 in 机会新增解析器._actions:
             if 必填参数 in 动作.option_strings:
                 动作.required = True
@@ -147,6 +134,8 @@ def 构建参数解析器() -> argparse.ArgumentParser:
 
     机会列表解析器 = 子命令解析器.add_parser("机会列表", help="查看合作机会列表")
     机会列表解析器.add_argument("--机会编号")
+    机会列表解析器.add_argument("--客户编号")
+    机会列表解析器.add_argument("--联系人编号", type=int)
     机会列表解析器.add_argument("--搜索关键词")
     机会列表解析器.add_argument("--当前阶段")
     机会列表解析器.add_argument("--优先级")
@@ -165,9 +154,6 @@ def 构建参数解析器() -> argparse.ArgumentParser:
 
     客户新增解析器 = 子命令解析器.add_parser("客户新增", help="新增客户")
     添加客户字段(客户新增解析器)
-    for 动作 in 客户新增解析器._actions:
-        if "--客户名称" in 动作.option_strings:
-            动作.required = True
 
     客户更新解析器 = 子命令解析器.add_parser("客户更新", help="更新客户")
     客户更新解析器.add_argument("--客户编号", required=True)
@@ -278,6 +264,23 @@ def 获取并校验令牌(参数令牌: str | None) -> str:
     return 输入令牌
 
 
+def 处理客户名称占位(参数: argparse.Namespace) -> None:
+    if 参数.命令 != "客户新增":
+        return
+
+    客户名称 = str(getattr(参数, "客户名称", "") or "").strip()
+    if 客户名称:
+        return
+
+    联系人姓名 = str(getattr(参数, "联系人姓名", "") or "").strip()
+    if 联系人姓名:
+        参数.客户名称 = 联系人姓名
+        print("未提供客户名称，已使用联系人姓名代替。")
+        return
+
+    raise SystemExit("缺少客户名称；若暂时未知，请传入 --联系人姓名 作为客户名称代替，禁止编造。")
+
+
 def 执行汇总命令(客户端: 销售系统接口客户端, 参数: argparse.Namespace) -> None:
     今日参数 = getattr(参数, "今日", None) or date.today().isoformat()
     汇总数据 = 客户端.查询销售汇总(今日=今日参数)
@@ -309,6 +312,8 @@ def 主程序() -> None:
         写入长效令牌(令牌)
         print("long_term_token 已写入 config.json")
         return
+
+    处理客户名称占位(参数)
 
     try:
         客户端 = 销售系统接口客户端()
