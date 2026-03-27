@@ -1,8 +1,5 @@
 {
   "development_mode": true,
-  "phone": "13800138000",
-  "password": "your-password",
-  "user_team_id": null,
   "long_term_token": "paste-your-long-term-token-here",
   "timeout_seconds": 20
 }

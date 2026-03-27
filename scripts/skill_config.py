@@ -16,9 +16,6 @@ DEFAULT_DEV_BASE_URL = "http://127.0.0.1:8000"
 def load_skill_config() -> dict[str, Any]:
     config: dict[str, Any] = {
         "development_mode": False,
-        "phone": "",
-        "password": "",
-        "user_team_id": None,
         "long_term_token": "",
         "timeout_seconds": 20,
     }
@@ -35,9 +32,6 @@ def load_skill_config() -> dict[str, Any]:
 def save_skill_config(config: dict[str, Any]) -> None:
     serializable_config = {
         "development_mode": bool(config.get("development_mode", False)),
-        "phone": str(config.get("phone") or ""),
-        "password": str(config.get("password") or ""),
-        "user_team_id": config.get("user_team_id"),
         "long_term_token": str(config.get("long_term_token") or ""),
         "timeout_seconds": config.get("timeout_seconds", 20),
     }
@@ -45,6 +39,12 @@ def save_skill_config(config: dict[str, Any]) -> None:
         json.dumps(serializable_config, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+
+
+def write_long_term_token(long_term_token: str) -> None:
+    config = load_skill_config()
+    config["long_term_token"] = str(long_term_token or "")
+    save_skill_config(config)
 
 
 def _resolve_base_url(config: dict[str, Any]) -> str:

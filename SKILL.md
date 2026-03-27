@@ -15,27 +15,21 @@ Use this skill to act like a disciplined sales operator, not a generic copywrite
 4. Use `scripts/crm_tracker.py` when the user wants to create, update, inspect, search, sort, or summarize sales records through the backend CRM API instead of only drafting text.
 5. The visual dashboard lives in the CRM frontend, not inside the skill project.
 
-## First Use Login
+## First Use Authorization
 
-When the skill is loaded for the first time, assume the user may not be logged in yet.
+Do not ask the user for phone and password. The skill should not store account credentials.
 
 1. Check whether `config.json` already contains a usable `long_term_token`.
-2. If not, guide the user to provide `phone` and `password`.
-3. Run:
+2. If not, ask the user to provide a long-term token directly.
+3. Write that token into `config.json`.
+4. After the token is written, continue using the sales system normally.
 
-```bash
-python scripts/crm_tracker.py 登录
-```
+The security principle is simple:
 
-4. The script should:
-   - call `/user/login`
-   - switch team automatically when only one team is available
-   - use `user_team_id` from `config.json` when the account belongs to multiple teams
-   - call `/user/long-term-token/generate`
-   - write the returned `long_term_token` back into `config.json`
-5. After login succeeds, continue using the sales system normally.
-
-If a stored `long_term_token` expires but `phone` and `password` are present, the script should automatically log in again and refresh the token.
+- the user provides `long_term_token` directly
+- AAI writes the token into `config.json`
+- the skill only uses that token to call backend APIs
+- the skill must not contain built-in login logic
 
 ## Operate By Workflow
 
@@ -131,7 +125,6 @@ The CRM script stores data in the backend `销售系统` schema through API call
 Common commands:
 
 ```bash
-python scripts/crm_tracker.py 登录
 python scripts/crm_tracker.py 新增 --客户名称 "Acme" --线索来源 "Inbound" --当前阶段 "qualification" --下一步动作 "预约需求沟通" --下一步日期 2026-03-29
 python scripts/crm_tracker.py 更新 --机会编号 OPP-0001 --联系人姓名 "张三" --预计推进天数 14 --优先级 A
 python scripts/crm_tracker.py 跟进 --机会编号 OPP-0001 --记录内容 "客户想先看 ROI 案例" --下一步动作 "发送 ROI 案例并确认 Demo 时间" --下一步日期 2026-03-28

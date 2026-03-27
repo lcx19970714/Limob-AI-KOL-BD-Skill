@@ -68,8 +68,6 @@ def 构建参数解析器() -> argparse.ArgumentParser:
     跟进解析器.add_argument("--上次沟通摘要")
     跟进解析器.add_argument("--客户想法")
 
-    登录解析器 = 子命令解析器.add_parser("登录", help="登录并生成长效令牌")
-
     列表解析器 = 子命令解析器.add_parser("列表", help="查看合作机会列表")
     列表解析器.add_argument("--搜索关键词")
     列表解析器.add_argument("--当前阶段")
@@ -181,10 +179,6 @@ def main() -> None:
     参数解析器 = 构建参数解析器()
     参数 = 参数解析器.parse_args()
     客户端 = 销售系统接口客户端()
-
-    if 参数.命令 == "登录":
-        print(json.dumps(客户端.登录并刷新长效令牌(), ensure_ascii=False, indent=2))
-        return
 
     if 参数.命令 == "新增":
         print(json.dumps(客户端.创建合作机会(构建请求体(参数)), ensure_ascii=False, indent=2))

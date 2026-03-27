@@ -1,8 +1,5 @@
 {
   "development_mode": false,
-  "phone": "",
-  "password": "",
-  "user_team_id": null,
   "long_term_token": "",
   "timeout_seconds": 20
 }
