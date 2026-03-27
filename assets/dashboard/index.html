@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>销售战情看板</title>
+    <style>
+        :root {
+            --底色: #f6efe4;
+            --面板: rgba(255, 252, 246, 0.92);
+            --文字: #102532;
+            --次级文字: #61707a;
+            --描边: rgba(16, 37, 50, 0.12);
+            --主色: #0c6a83;
+            --深主色: #0f4052;
+            --强调: #f08b45;
+            --成功: #0c8b66;
+            --预警: #d97706;
+            --危险: #c2410c;
+            --阴影: 0 22px 44px rgba(16, 37, 50, 0.12);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+            color: var(--文字);
+            background:
+                radial-gradient(circle at 12% 10%, rgba(240, 139, 69, 0.18), transparent 24%),
+                radial-gradient(circle at 88% 18%, rgba(12, 106, 131, 0.16), transparent 24%),
+                linear-gradient(180deg, #fbf5ea 0%, #efe0c4 100%);
+        }
+
+        .页面 {
+            width: min(1380px, calc(100% - 28px));
+            margin: 0 auto;
+            padding: 24px 0 40px;
+        }
+
+        .头图,
+        .面板,
+        .指标卡,
+        .操作卡,
+        .焦点卡,
+        .阶段卡,
+        .洞察卡 {
+            border: 1px solid var(--描边);
+            box-shadow: var(--阴影);
+        }
+
+        .头图 {
+            padding: 28px;
+            border-radius: 34px;
+            background: linear-gradient(135deg, rgba(12, 63, 82, 0.98) 0%, rgba(12, 106, 131, 0.95) 56%, rgba(240, 139, 69, 0.92) 100%);
+            color: #fffaf3;
+        }
+
+        .头图顶部,
+        .标题栏 {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .眉标,
+        .状态标,
+        .指标标,
+        .标签 {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .眉标 { background: rgba(255, 255, 255, 0.12); }
+        .状态标 { background: rgba(255, 255, 255, 0.14); }
+        .指标标 { background: linear-gradient(135deg, var(--主色) 0%, var(--深主色) 100%); color: #fff; }
+        .标签A { background: rgba(12, 139, 102, 0.12); color: var(--成功); }
+        .标签B { background: rgba(240, 139, 69, 0.12); color: var(--预警); }
+        .标签C { background: rgba(16, 37, 50, 0.08); color: var(--次级文字); }
+        .标签今日 { background: rgba(12, 106, 131, 0.1); color: var(--深主色); }
+        .标签逾期 { background: rgba(194, 65, 12, 0.12); color: var(--危险); }
+
+        .头图 h1 {
+            margin: 14px 0 10px;
+            font-size: clamp(34px, 6vw, 58px);
+            line-height: 1.08;
+            font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+        }
+
+        .头图 p {
+            margin: 0;
+            max-width: 820px;
+            line-height: 1.82;
+            font-size: 15px;
+            color: rgba(255, 250, 243, 0.92);
+        }
+
+        .按钮组 {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .按钮 {
+            appearance: none;
+            border: 0;
+            cursor: pointer;
+            text-decoration: none;
+            border-radius: 999px;
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .按钮主 {
+            background: #fff5e9;
+            color: var(--深主色);
+        }
+
+        .按钮次 {
+            background: rgba(255, 255, 255, 0.14);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .网格双栏,
+        .内容双栏,
+        .四列,
+        .三列 {
+            display: grid;
+            gap: 16px;
+        }
+
+        .网格双栏,
+        .内容双栏 {
+            margin-top: 18px;
+            grid-template-columns: 1.3fr 0.7fr;
+        }
+
+        .四列 {
+            margin-top: 18px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .三列 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .面板,
+        .指标卡,
+        .操作卡,
+        .焦点卡,
+        .阶段卡,
+        .洞察卡 {
+            background: var(--面板);
+            border-radius: 24px;
+        }
+
+        .面板主体,
+        .指标卡,
+        .操作卡,
+        .焦点卡,
+        .阶段卡,
+        .洞察卡 {
+            padding: 20px;
+        }
+
+        .面板 h2 {
+            margin: 0 0 8px;
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .面板 p,
+        .面板 label,
+        .面板 li,
+        .次级文案 {
+            color: var(--次级文字);
+            line-height: 1.75;
+            font-size: 14px;
+        }
+
+        select {
+            width: 100%;
+            border: 1px solid var(--描边);
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.88);
+            font-size: 14px;
+            color: var(--文字);
+        }
+
+        .指标值 {
+            margin-top: 16px;
+            font-size: 42px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .指标名 {
+            margin-top: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--次级文字);
+        }
+
+        .提示文案,
+        .卡片文案 {
+            margin-top: 10px;
+            font-size: 13px;
+            color: var(--次级文字);
+            line-height: 1.8;
+        }
+
+        .重点动作 {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(240, 139, 69, 0.1);
+            color: var(--深主色);
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.75;
+        }
+
+        .空态 {
+            border: 1px dashed rgba(16, 37, 50, 0.18);
+            border-radius: 18px;
+            padding: 22px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.55);
+            color: var(--次级文字);
+        }
+
+        .教程网格 {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .标签导航 {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .标签按钮 {
+            appearance: none;
+            border: 1px solid rgba(16, 37, 50, 0.12);
+            background: rgba(255, 252, 246, 0.82);
+            color: var(--次级文字);
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+        }
+
+        .标签按钮:hover {
+            transform: translateY(-1px);
+        }
+
+        .标签按钮.激活 {
+            background: linear-gradient(135deg, var(--主色) 0%, var(--深主色) 100%);
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .标签面板 {
+            display: none;
+        }
+
+        .标签面板.激活 {
+            display: block;
+        }
+
+        .步骤列表,
+        .逻辑列表 {
+            display: grid;
+            gap: 12px;
+        }
+
+        .步骤卡,
+        .逻辑卡 {
+            border-radius: 18px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.88);
+            border: 1px solid rgba(16, 37, 50, 0.08);
+        }
+
+        .步骤序号 {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--主色) 0%, var(--深主色) 100%);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .命令块 {
+            margin-top: 10px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: #102532;
+            color: #f8fafc;
+            font-size: 13px;
+            line-height: 1.8;
+            font-family: Consolas, "Courier New", monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .教程提示 {
+            margin-top: 10px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(12, 106, 131, 0.08);
+            color: var(--深主色);
+            font-size: 13px;
+            line-height: 1.75;
+            font-weight: 700;
+        }
+
+        .路径列表 {
+            margin-top: 10px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .路径项 {
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(16, 37, 50, 0.05);
+            color: var(--次级文字);
+            font-size: 13px;
+            line-height: 1.7;
+            word-break: break-word;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            text-align: left;
+            font-size: 12px;
+            color: var(--次级文字);
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--描边);
+        }
+
+        tbody td {
+            padding: 14px 10px;
+            border-bottom: 1px solid rgba(16, 37, 50, 0.06);
+            vertical-align: top;
+            font-size: 14px;
+        }
+
+        .客户主名 {
+            font-weight: 900;
+        }
+
+        .客户副名 {
+            margin-top: 4px;
+            font-size: 12px;
+            color: var(--次级文字);
+        }
+
+        .列表栈 {
+            display: grid;
+            gap: 12px;
+        }
+
+        .洞察卡 ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        @media (max-width: 1140px) {
+            .网格双栏, .内容双栏 { grid-template-columns: 1fr; }
+            .四列 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .三列 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .教程网格 { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 760px) {
+            .页面 { width: min(100% - 18px, 100%); padding-top: 12px; }
+            .头图 { padding: 20px; border-radius: 24px; }
+            .四列, .三列 { grid-template-columns: 1fr; }
+            table, thead, tbody, th, td, tr { display: block; }
+            thead { display: none; }
+            tbody td { padding: 10px 0; border-bottom: 0; }
+            tbody tr { padding: 14px 0; border-bottom: 1px solid rgba(16, 37, 50, 0.08); }
+        }
+    </style>
+</head>
+<body>
+    <div class="页面">
+        <section class="头图">
+            <div class="头图顶部">
+                <div>
+                    <span class="眉标">销售 AGENT / SQLite 本地看板</span>
+                    <h1>销售数据只存一份，<br>今天动作自然清楚。</h1>
+                    <p>当前版本已经切到 SQLite 单一数据源。客户管理脚本和销售看板都只读取同一个本地数据库，不再依赖 JSON 中转或示例数据兼容逻辑。</p>
+                    <div class="按钮组">
+                        <button class="按钮 按钮主" id="refreshBtn" type="button">刷新数据库数据</button>
+                    </div>
+                </div>
+                <div class="状态标" id="serviceStatus">正在检查本地服务</div>
+            </div>
+        </section>
+
+        <section class="标签导航" id="tabNav">
+            <button class="标签按钮 激活" type="button" data-tab="overview">作战总览</button>
+            <button class="标签按钮" type="button" data-tab="tutorial">使用教程</button>
+            <button class="标签按钮" type="button" data-tab="logic">逻辑说明</button>
+        </section>
+
+        <section class="标签面板 激活" data-pane="overview">
+        <section class="网格双栏">
+            <article class="面板">
+                <div class="面板主体">
+                    <h2>筛选条件</h2>
+                    <p>看板只做展示，不直接写数据。正式数据维护统一通过 `crm_tracker.py` 写入 SQLite，再由本地服务实时返回。</p>
+                    <div class="三列">
+                        <div>
+                            <label for="stageFilter">按阶段筛选</label>
+                            <select id="stageFilter"><option value="">全部阶段</option></select>
+                        </div>
+                        <div>
+                            <label for="gradeFilter">按优先级筛选</label>
+                            <select id="gradeFilter">
+                                <option value="">全部优先级</option>
+                                <option value="A">A 类</option>
+                                <option value="B">B 类</option>
+                                <option value="C">C 类</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>服务地址</label>
+                            <select disabled><option>http://127.0.0.1:8765</option></select>
+                        </div>
+                    </div>
+                    <div class="提示文案" id="helpText">如果页面显示未连接，请直接运行 `python scripts/launch_dashboard.py`，它会自动启动并打开看板。</div>
+                </div>
+            </article>
+
+            <div class="列表栈">
+                <article class="面板"><div class="面板主体">
+                    <h2>当前状态</h2>
+                    <p>这套系统已经收敛成单一 SQLite 数据源。你平时只需要关心客户推进和看板结果，不需要关心底层结构。</p>
+                </div></article>
+                <article class="面板"><div class="面板主体">
+                    <h2>升级方向</h2>
+                    <p>下一步可以继续补“销售日报”、“试用专区”、“报价合同专区”，但不再引入 JSON 兼容层。</p>
+                </div></article>
+            </div>
+        </section>
+
+        <section class="四列" id="metricsGrid"></section>
+
+        <section class="内容双栏">
+            <article class="面板"><div class="面板主体">
+                <div class="标题栏"><h2>今日行动清单</h2><span class="状态标">优先显示今日到期与已逾期</span></div>
+                <div class="列表栈" id="actionList"></div>
+            </div></article>
+            <article class="面板"><div class="面板主体">
+                <div class="标题栏"><h2>A / B / C 焦点机会</h2></div>
+                <div class="三列" id="focusGrid"></div>
+            </div></article>
+        </section>
+
+        <section class="内容双栏">
+            <article class="面板"><div class="面板主体">
+                <div class="标题栏"><h2>阶段推进分布</h2><span class="状态标">按 SQLite 实时统计</span></div>
+                <div class="三列" id="stageBoard"></div>
+            </div></article>
+            <article class="面板"><div class="面板主体">
+                <div class="标题栏"><h2>销售洞察</h2></div>
+                <div class="列表栈" id="insightBlock"></div>
+            </div></article>
+        </section>
+
+        <section class="面板" style="margin-top: 18px;">
+            <div class="面板主体">
+                <div class="标题栏"><h2>客户明细</h2><span class="状态标" id="tableChip">当前记录 0 条</span></div>
+                <div id="tableWrap"></div>
+            </div>
+        </section>
+        </section>
+
+        <section class="标签面板" data-pane="tutorial">
+        <section class="教程网格">
+            <article class="面板">
+                <div class="面板主体">
+                    <div class="标题栏">
+                        <h2>AI 使用教程</h2>
+                        <span class="状态标">你只需要告诉 AI 你想做什么</span>
+                    </div>
+                    <div class="步骤列表">
+                        <article class="步骤卡">
+                            <div class="标题栏">
+                                <span class="步骤序号">1</span>
+                                <strong>一键启动看板</strong>
+                            </div>
+                            <div class="卡片文案">你不用关心服务、端口、脚本这些底层细节，直接让 AI 帮你打开销售看板就行。</div>
+                            <div class="命令块">用 sales-automation-crm 打开销售看板</div>
+                        </article>
+
+                        <article class="步骤卡">
+                            <div class="标题栏">
+                                <span class="步骤序号">2</span>
+                                <strong>新增一条销售机会</strong>
+                            </div>
+                            <div class="卡片文案">你只要把客户信息用自然语言告诉 AI，AI 会帮你写进系统。优先级如果你没说，它会按当前规则自动判断。</div>
+                            <div class="命令块">用 sales-automation-crm 新增一条销售机会：
+客户是杭州某品牌，联系人王敏，角色市场负责人，来源 Expo，
+当前阶段是资格判断，痛点是找达人慢和跟进断档，
+负责人 Leo，下一步动作是发送 ROI 案例并约 Demo，
+下一步日期是 2026-03-29</div>
+                        </article>
+
+                        <article class="步骤卡">
+                            <div class="标题栏">
+                                <span class="步骤序号">3</span>
+                                <strong>记录一次跟进</strong>
+                            </div>
+                            <div class="卡片文案">客户有了新反馈时，你直接告诉 AI 这次跟进发生了什么、结果是什么、下一步要做什么。</div>
+                            <div class="命令块">用 sales-automation-crm 记录 LEAD-0001 的跟进：
+这次跟进内容是客户愿意先试一个产品线，
+跟进结果是继续推进 Demo，
+下一步动作改成锁定 Demo 时间，
+下一步日期改成 2026-03-30</div>
+                        </article>
+
+                        <article class="步骤卡">
+                            <div class="标题栏">
+                                <span class="步骤序号">4</span>
+                                <strong>让 AI 帮你看今天该做什么</strong>
+                            </div>
+                            <div class="卡片文案">你不一定要自己翻列表，可以直接让 AI 帮你总结今天该跟进谁、哪条机会最值得先推进。</div>
+                            <div class="命令块">用 sales-automation-crm 看一下今天该跟进谁，
+优先告诉我已逾期、今日到期和 A 类机会</div>
+                        </article>
+
+                        <article class="步骤卡">
+                            <div class="标题栏">
+                                <span class="步骤序号">5</span>
+                                <strong>让 AI 帮你生成话术</strong>
+                            </div>
+                            <div class="卡片文案">你可以直接让 AI 按当前阶段给你出一条能发给客户的话术，不需要自己从零写。</div>
+                            <div class="命令块">用 sales-automation-crm 按资格判断阶段，
+给杭州某品牌写一条下一步推进话术，
+目标是把客户约到 Demo</div>
+                        </article>
+
+                        <article class="步骤卡">
+                            <div class="标题栏">
+                                <span class="步骤序号">6</span>
+                                <strong>你真正要记住的只有一句</strong>
+                            </div>
+                            <div class="卡片文案">不要背命令，也不用记数据库结构。你只要直接告诉 AI：我要新增、跟进、查看、开看板、生成话术，它就会调用这个 skill 去做。</div>
+                            <div class="教程提示">简单理解：你说业务目标，AI 负责操作系统。</div>
+                        </article>
+                    </div>
+                </div>
+            </article>
+
+        </section>
+        </section>
+
+        <section class="标签面板" data-pane="logic">
+            <section class="网格双栏">
+                <article class="面板">
+                    <div class="面板主体">
+                        <div class="标题栏">
+                            <h2>核心逻辑</h2>
+                            <span class="状态标">你可以按这里逐条挑错</span>
+                        </div>
+                        <div class="逻辑列表">
+                            <article class="逻辑卡">
+                                <strong>1. 数据源只有一份</strong>
+                                <div class="卡片文案">正式数据只存在 SQLite，不再走 JSON 中转，也没有双写逻辑。看板和 skill 共用同一份数据。</div>
+                            </article>
+
+                            <article class="逻辑卡">
+                                <strong>2. 优先级自动推断规则</strong>
+                                <div class="卡片文案">当前规则是：如果阶段已经到 Demo / 试用 / 报价 / 合同，默认更偏 A；如果有明确决策人且推进周期短，也偏 A；如果痛点明确但还没到成交前阶段，偏 B；否则偏 C。</div>
+                            </article>
+
+                            <article class="逻辑卡">
+                                <strong>3. 看板最重要的是“今日动作”</strong>
+                                <div class="卡片文案">页面优先展示今日到期、已逾期、A 类机会，而不是先给一堆图。这是故意的，因为你的场景更重执行，不是纯 BI。</div>
+                            </article>
+
+                            <article class="逻辑卡">
+                                <strong>4. 阶段统计按 SOP 来</strong>
+                                <div class="卡片文案">阶段卡片不是泛 CRM 漏斗，而是按你自己的销售 SOP 走：线索入库、首聊、资格判断、需求沟通、Demo、试用、报价、合同、交接。</div>
+                            </article>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="面板">
+                    <div class="面板主体">
+                        <div class="标题栏">
+                            <h2>你该重点检查什么</h2>
+                            <span class="状态标">最值得你提出修改意见的地方</span>
+                        </div>
+                        <div class="逻辑列表">
+                            <article class="逻辑卡">
+                                <strong>5. 想改规则改哪里</strong>
+                                <div class="路径列表">
+                                    <div class="路径项">优先级推断：`scripts/sales_db.py` 里的 `推断优先级`</div>
+                                    <div class="路径项">阶段定义与中文名：`scripts/sales_db.py` 里的 `阶段配置`</div>
+                                    <div class="路径项">命令行入口：`scripts/crm_tracker.py`</div>
+                                    <div class="路径项">页面布局：`assets/dashboard/index.html`</div>
+                                </div>
+                            </article>
+
+                            <article class="逻辑卡">
+                                <strong>6. 你接下来最值得检查的地方</strong>
+                                <div class="卡片文案">重点看 3 件事：A/B/C 推断是否符合你实际销售判断、阶段划分是否顺手、今日行动排序是不是你真正想先处理的顺序。</div>
+                            </article>
+
+                            <article class="逻辑卡">
+                                <strong>7. 我建议你怎么提修改</strong>
+                                <div class="卡片文案">你可以直接说“这个规则不对”，不用替我想实现方式。比如：A 类判断太宽、资格判断和需求沟通想合并、今日行动排序想先逾期再 A 类。</div>
+                            </article>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </section>
+
+    </div>
+
+    <script>
+        const 服务地址 = window.location.origin;
+        const refs = {
+            serviceStatus: document.getElementById("serviceStatus"),
+            helpText: document.getElementById("helpText"),
+            stageFilter: document.getElementById("stageFilter"),
+            gradeFilter: document.getElementById("gradeFilter"),
+            metricsGrid: document.getElementById("metricsGrid"),
+            actionList: document.getElementById("actionList"),
+            focusGrid: document.getElementById("focusGrid"),
+            stageBoard: document.getElementById("stageBoard"),
+            insightBlock: document.getElementById("insightBlock"),
+            tableWrap: document.getElementById("tableWrap"),
+            tableChip: document.getElementById("tableChip")
+        };
+        const state = { 阶段: "", 优先级: "", 数据: null };
+
+        function 安全文本(value) {
+            return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+        }
+
+        function 标签HTML(优先级) {
+            if (优先级 === "A") return '<span class="标签 标签A">A 类重点</span>';
+            if (优先级 === "B") return '<span class="标签 标签B">B 类推进</span>';
+            return '<span class="标签 标签C">C 类观察</span>';
+        }
+
+        function 日期标签HTML(记录) {
+            const 今日 = new Date().toISOString().slice(0, 10);
+            if (!记录.下一步日期) return '<span class="标签 标签C">未设日期</span>';
+            if (记录.下一步日期 < 今日) return '<span class="标签 标签逾期">已逾期</span>';
+            if (记录.下一步日期 === 今日) return '<span class="标签 标签今日">今日到期</span>';
+            return `<span class="标签 标签C">${安全文本(记录.下一步日期)}</span>`;
+        }
+
+        function 渲染指标(统计) {
+            const cards = [
+                ["总览", "活跃机会", 统计.活跃机会数, "当前仍在推进中的全部机会数"],
+                ["今日", "今日到期", 统计.今日到期数, "今天必须处理的机会数"],
+                ["风险", "已逾期", 统计.已逾期数, "已经超出下一步日期的客户"],
+                ["聚焦", "A 类机会", 统计.A类机会数, "更接近试用、报价与成交的重点客户"],
+                ["验证", "试用推进", 统计.试用推进数, "试用启动与试用跟进中的客户"],
+                ["成交", "报价合同", 统计.报价合同数, "距离成交最近的商业动作"]
+            ];
+            refs.metricsGrid.innerHTML = cards.map(card => `
+                <article class="指标卡">
+                    <span class="指标标">${card[0]}</span>
+                    <div class="指标值">${card[2]}</div>
+                    <div class="指标名">${card[1]}</div>
+                    <div class="提示文案">${card[3]}</div>
+                </article>
+            `).join("");
+        }
+
+        function 渲染行动(列表) {
+            if (!列表.length) {
+                refs.actionList.innerHTML = '<div class="空态">当前没有需要立刻推进的客户。</div>';
+                return;
+            }
+            refs.actionList.innerHTML = 列表.map(记录 => `
+                <article class="操作卡">
+                    <div class="标题栏">
+                        <div style="font-size:17px;font-weight:900;">${安全文本(记录.客户名称)}</div>
+                        <div>${标签HTML(记录.优先级)} ${日期标签HTML(记录)}</div>
+                    </div>
+                    <div class="卡片文案">
+                        联系人：${安全文本(记录.联系人 || "未填写")} / ${安全文本(记录.联系角色 || "角色未填")}<br>
+                        当前阶段：${安全文本(记录.当前阶段 ? 记录.当前阶段名称 || 记录.当前阶段 : "未填写")}<br>
+                        决策人：${安全文本(记录.决策人 || "未填写")} / ${记录.是否决策人 === 1 ? "当前联系人可拍板" : "当前联系人未确认拍板"}<br>
+                        试用状态：${安全文本(记录.试用状态 || "未试用")}<br>
+                        最近沟通：${安全文本(记录.最近联系时间 || "未记录")}<br>
+                        负责人：${安全文本(记录.内部负责人 || "未分配")}<br>
+                        核心痛点：${安全文本(记录.核心痛点 || "未填写")}
+                    </div>
+                    <div class="重点动作">下一步动作：${安全文本(记录.下一步动作 || "未填写")}</div>
+                </article>
+            `).join("");
+        }
+
+        function 渲染焦点(焦点机会) {
+            const 配置 = [
+                ["A类", "A 类", "今天优先盯防，尽快推进到 Demo / 试用 / 报价。"],
+                ["B类", "B 类", "需求真实，但还需要继续确认时机和拍板路径。"],
+                ["C类", "C 类", "保留观察，不要过度投入高强度销售资源。"]
+            ];
+            refs.focusGrid.innerHTML = 配置.map(([key, title, desc]) => {
+                const 记录 = 焦点机会[key];
+                if (!记录) {
+                    return `<article class="焦点卡"><div style="font-size:18px;font-weight:900;">${title}</div><div class="卡片文案">${desc}<br>当前筛选下暂无对应客户。</div></article>`;
+                }
+                return `
+                    <article class="焦点卡">
+                        <div style="font-size:18px;font-weight:900;">${title}</div>
+                        <div class="卡片文案">
+                            焦点客户：${安全文本(记录.客户名称)}<br>
+                            当前阶段：${安全文本(记录.当前阶段名称 || 记录.当前阶段)}<br>
+                            建议动作：${安全文本(记录.下一步动作 || "未填写")}
+                        </div>
+                    </article>
+                `;
+            }).join("");
+        }
+
+        function 渲染阶段(阶段分布) {
+            refs.stageBoard.innerHTML = 阶段分布.map(item => `
+                <article class="阶段卡">
+                    <span class="指标标">${安全文本(item.阶段名称)}</span>
+                    <div style="margin-top:10px;font-size:18px;font-weight:900;">${安全文本(item.阶段名称)}</div>
+                    <div style="font-size:30px;font-weight:900;color:var(--深主色);margin-top:10px;">${item.数量}</div>
+                    <div class="卡片文案">
+                        阶段目标：${安全文本(item.阶段目标)}<br>
+                        ${item.代表客户 ? `代表客户：${安全文本(item.代表客户)}` : "当前暂无客户停留在这里"}
+                    </div>
+                </article>
+            `).join("");
+        }
+
+        function 渲染洞察(销售洞察) {
+            refs.insightBlock.innerHTML = 销售洞察.map(item => `
+                <article class="洞察卡">
+                    <div style="font-size:18px;font-weight:900;">${安全文本(item.标题)}</div>
+                    ${item.内容 ? `<p class="卡片文案">${安全文本(item.内容)}</p>` : `<ul class="卡片文案">${(item.列表 || []).map(line => `<li>${安全文本(line)}</li>`).join("")}</ul>`}
+                </article>
+            `).join("");
+        }
+
+        function 渲染表格(客户列表) {
+            refs.tableChip.textContent = `当前记录 ${客户列表.length} 条`;
+            if (!客户列表.length) {
+                refs.tableWrap.innerHTML = '<div class="空态">当前筛选下没有客户记录。</div>';
+                return;
+            }
+            refs.tableWrap.innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>客户</th>
+                            <th>来源</th>
+                            <th>阶段</th>
+                            <th>优先级</th>
+                            <th>试用状态</th>
+                            <th>最近沟通</th>
+                            <th>上次沟通</th>
+                            <th>核心痛点</th>
+                            <th>下一步动作</th>
+                            <th>日期</th>
+                            <th>负责人</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${客户列表.map(记录 => `
+                            <tr>
+                                <td>
+                                    <div class="客户主名">${安全文本(记录.客户名称)}</div>
+                                    <div class="客户副名">${安全文本(记录.联系人 || "未填联系人")} / ${安全文本(记录.联系角色 || "未填角色")}</div>
+                                </td>
+                                <td>${安全文本(记录.线索来源 || "未填")}</td>
+                                <td>${安全文本(记录.当前阶段名称 || 记录.当前阶段 || "未填")}</td>
+                                <td>${安全文本(记录.优先级 || "未填")}</td>
+                                <td>${安全文本(记录.试用状态 || "未试用")}</td>
+                                <td>${安全文本(记录.最近联系时间 || "未记录")}</td>
+                                <td>${安全文本(记录.上次沟通摘要 || 记录.客户想法 || "未填")}</td>
+                                <td>${安全文本(记录.核心痛点 || "未填")}</td>
+                                <td>${安全文本(记录.下一步动作 || "未填")}</td>
+                                <td>${安全文本(记录.下一步日期 || "未填")}</td>
+                                <td>${安全文本(记录.内部负责人 || "未分配")}</td>
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function 渲染全部(数据) {
+            渲染指标(数据.统计);
+            渲染行动(数据.今日行动 || []);
+            渲染焦点(数据.焦点机会 || {});
+            渲染阶段(数据.阶段分布 || []);
+            渲染洞察(数据.销售洞察 || []);
+            渲染表格(数据.客户列表 || []);
+        }
+
+        function 填充筛选项(筛选项) {
+            const 当前阶段值 = refs.stageFilter.value;
+            refs.stageFilter.innerHTML = `<option value="">全部阶段</option>${(筛选项.阶段 || []).map(item => `<option value="${item.代码}">${item.名称}</option>`).join("")}`;
+            refs.stageFilter.value = 当前阶段值 || "";
+        }
+
+        async function 刷新数据() {
+            const url = new URL("/api/dashboard", 服务地址);
+            if (state.阶段) url.searchParams.set("阶段", state.阶段);
+            if (state.优先级) url.searchParams.set("优先级", state.优先级);
+
+            try {
+                refs.serviceStatus.textContent = "正在读取 SQLite 数据";
+                const response = await fetch(url.toString(), { cache: "no-store" });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                state.数据 = data;
+                填充筛选项(data.筛选项 || {});
+                渲染全部(data);
+                refs.serviceStatus.textContent = `数据库已连接 / ${data.生成时间}`;
+                refs.helpText.textContent = "当前看板已直接连接 SQLite 数据库。新增、更新、跟进后刷新即可看到最新结果。";
+            } catch (error) {
+                refs.serviceStatus.textContent = "未连接本地服务";
+                refs.helpText.textContent = "请直接运行 python scripts/launch_dashboard.py ，它会自动启动本地服务并打开看板。";
+                refs.metricsGrid.innerHTML = "";
+                refs.actionList.innerHTML = '<div class="空态">本地服务未启动，暂时无法读取 SQLite 数据。</div>';
+                refs.focusGrid.innerHTML = "";
+                refs.stageBoard.innerHTML = "";
+                refs.insightBlock.innerHTML = "";
+                refs.tableWrap.innerHTML = '<div class="空态">启动本地服务后，这里会展示真实客户数据。</div>';
+                refs.tableChip.textContent = "当前记录 0 条";
+            }
+        }
+
+        document.getElementById("refreshBtn").addEventListener("click", 刷新数据);
+        refs.stageFilter.addEventListener("change", event => { state.阶段 = event.target.value; 刷新数据(); });
+        refs.gradeFilter.addEventListener("change", event => { state.优先级 = event.target.value; 刷新数据(); });
+
+        document.querySelectorAll("[data-tab]").forEach(button => {
+            button.addEventListener("click", () => {
+                const target = button.dataset.tab;
+                document.querySelectorAll("[data-tab]").forEach(item => item.classList.toggle("激活", item === button));
+                document.querySelectorAll("[data-pane]").forEach(pane => pane.classList.toggle("激活", pane.dataset.pane === target));
+            });
+        });
+
+        刷新数据();
+    </script>
+</body>
+</html>

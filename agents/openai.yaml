@@ -1,0 +1,7 @@
+interface:
+  display_name: "Sales Automation CRM"
+  short_description: "SOP-driven sales ops with outreach, pipeline, and CRM tracking."
+  default_prompt: "Use $sales-automation-crm to qualify leads, update pipeline records, and draft the next best sales action."
+
+policy:
+  allow_implicit_invocation: true
