@@ -10,7 +10,7 @@ from getpass import getpass
 from typing import Any
 
 from skill_api import 销售系统接口客户端
-from skill_config import write_long_term_token as 写入长效令牌
+from skill_config import 写入长效令牌
 from 日期工具 import 标准化参数日期字段
 
 机会字段列表 = [

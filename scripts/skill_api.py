@@ -8,12 +8,12 @@ import urllib.error
 import urllib.request
 from typing import Any
 
-from skill_config import load_skill_config
+from skill_config import 加载技能配置
 
 
 class 销售系统接口客户端:
     def __init__(self) -> None:
-        配置 = load_skill_config()
+        配置 = 加载技能配置()
         self.base_url = str(配置["resolved_base_url"]).rstrip("/")
         self.timeout = float(配置.get("timeout_seconds", 20))
         self.long_term_token = str(配置.get("long_term_token") or "")
