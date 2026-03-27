@@ -15,6 +15,28 @@ Use this skill to act like a disciplined sales operator, not a generic copywrite
 4. Use `scripts/crm_tracker.py` when the user wants to create, update, inspect, search, sort, or summarize sales records through the backend CRM API instead of only drafting text.
 5. The visual dashboard lives in the CRM frontend, not inside the skill project.
 
+## First Use Login
+
+When the skill is loaded for the first time, assume the user may not be logged in yet.
+
+1. Check whether `config.json` already contains a usable `long_term_token`.
+2. If not, guide the user to provide `phone` and `password`.
+3. Run:
+
+```bash
+python scripts/crm_tracker.py 登录
+```
+
+4. The script should:
+   - call `/user/login`
+   - switch team automatically when only one team is available
+   - use `user_team_id` from `config.json` when the account belongs to multiple teams
+   - call `/user/long-term-token/generate`
+   - write the returned `long_term_token` back into `config.json`
+5. After login succeeds, continue using the sales system normally.
+
+If a stored `long_term_token` expires but `phone` and `password` are present, the script should automatically log in again and refresh the token.
+
 ## Operate By Workflow
 
 ### Process a New Lead
@@ -104,8 +126,7 @@ When reporting pipeline status, always include:
 
 ## Use the CRM Script
 
-The CRM script now stores data in the backend `销售系统` schema through API calls authenticated by a long-term token.
-The script reads its runtime config through the built-in configuration loader, so usage docs do not need to repeat environment switching details.
+The CRM script stores data in the backend `销售系统` schema through API calls authenticated by a long-term token.
 
 Common commands:
 
