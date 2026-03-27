@@ -7,6 +7,7 @@ import argparse
 import json
 
 from skill_api import 销售系统接口客户端
+from skill_config import write_long_term_token
 
 
 def 添加通用字段(参数解析器: argparse.ArgumentParser) -> None:
@@ -41,6 +42,9 @@ def 添加通用字段(参数解析器: argparse.ArgumentParser) -> None:
 def 构建参数解析器() -> argparse.ArgumentParser:
     参数解析器 = argparse.ArgumentParser(description="销售系统合作机会工具")
     子命令解析器 = 参数解析器.add_subparsers(dest="命令", required=True)
+
+    设置令牌解析器 = 子命令解析器.add_parser("设置令牌", help="写入 long_term_token 到 config.json")
+    设置令牌解析器.add_argument("long_term_token", help="长效令牌")
 
     新增解析器 = 子命令解析器.add_parser("新增", help="新增一条合作机会")
     添加通用字段(新增解析器)
@@ -176,6 +180,12 @@ def 输出分页结果(查询结果: dict, 行生成器) -> None:
 def main() -> None:
     参数解析器 = 构建参数解析器()
     参数 = 参数解析器.parse_args()
+
+    if 参数.命令 == "设置令牌":
+        write_long_term_token(参数.long_term_token)
+        print("long_term_token 已写入 config.json")
+        return
+
     客户端 = 销售系统接口客户端()
 
     if 参数.命令 == "新增":
