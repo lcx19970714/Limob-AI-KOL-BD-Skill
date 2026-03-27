@@ -131,18 +131,21 @@ python scripts/crm_tracker.py 机会新增 --客户名称 "Acme" --线索来源 
 python scripts/crm_tracker.py 机会更新 --机会编号 OPP-0001 --联系人姓名 "张三" --预计推进天数 14 --优先级 A
 python scripts/crm_tracker.py 机会跟进 --机会编号 OPP-0001 --记录内容 "客户想先看 ROI 案例" --下一步动作 "发送 ROI 案例并确认 Demo 时间" --下一步日期 2026-03-28
 python scripts/crm_tracker.py 机会列表 --当前阶段 demo --排序字段 下一步日期 --排序方向 升序
+python scripts/crm_tracker.py 机会列表 --机会编号 OPP-0001
 python scripts/crm_tracker.py 机会详情 --机会编号 OPP-0001
 python scripts/crm_tracker.py 机会删除 --机会编号 OPP-0001
 
 python scripts/crm_tracker.py 客户新增 --客户名称 "Acme" --产品类目 "美妆"
 python scripts/crm_tracker.py 客户更新 --客户编号 CUST-0001 --月建联量 300
 python scripts/crm_tracker.py 客户详情 --客户编号 CUST-0001
+python scripts/crm_tracker.py 客户列表 --客户编号 CUST-0001
 python scripts/crm_tracker.py 客户删除 --客户编号 CUST-0001
 python scripts/crm_tracker.py 客户列表 --搜索关键词 美妆 --排序字段 更新时间 --排序方向 降序
 
 python scripts/crm_tracker.py 联系人新增 --客户编号 CUST-0001 --联系人姓名 "王五" --联系角色 "负责人" --是否决策人 1
 python scripts/crm_tracker.py 联系人更新 --联系人编号 1001 --联系角色 "CMO"
 python scripts/crm_tracker.py 联系人详情 --联系人编号 1001
+python scripts/crm_tracker.py 联系人列表 --联系人编号 1001
 python scripts/crm_tracker.py 联系人删除 --联系人编号 1001
 python scripts/crm_tracker.py 联系人列表 --搜索关键词 王 --是否决策人 1 --排序字段 更新时间 --排序方向 降序
 
@@ -152,9 +155,9 @@ python scripts/crm_tracker.py 看板
 
 List query capabilities:
 
-- `机会列表` supports `--搜索关键词` `--当前阶段` `--优先级` `--内部负责人` `--下一步日期` `--下一步日期截止前` `--仅看活跃` `--排序字段` `--排序方向` `--页码` `--每页数量`
-- `客户列表` supports `--搜索关键词` `--产品类目` `--排序字段` `--排序方向` `--页码` `--每页数量`
-- `联系人列表` supports `--搜索关键词` `--客户编号` `--联系角色` `--是否决策人` `--排序字段` `--排序方向` `--页码` `--每页数量`
+- `机会列表` supports `--机会编号` `--搜索关键词` `--当前阶段` `--优先级` `--内部负责人` `--下一步日期` `--下一步日期截止前` `--仅看活跃` `--排序字段` `--排序方向` `--页码` `--每页数量`
+- `客户列表` supports `--客户编号` `--客户名称` `--搜索关键词` `--产品类目` `--排序字段` `--排序方向` `--页码` `--每页数量`
+- `联系人列表` supports `--联系人编号` `--联系人姓名` `--搜索关键词` `--客户编号` `--联系角色` `--是否决策人` `--排序字段` `--排序方向` `--页码` `--每页数量`
 
 ## Output Templates
 
