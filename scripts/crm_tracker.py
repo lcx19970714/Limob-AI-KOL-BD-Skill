@@ -26,7 +26,6 @@ def 添加通用字段(参数解析器: argparse.ArgumentParser) -> None:
     参数解析器.add_argument("--上次沟通摘要")
     参数解析器.add_argument("--客户想法")
     参数解析器.add_argument("--预计推进天数", type=int)
-    参数解析器.add_argument("--推进目标")
     参数解析器.add_argument("--内部负责人")
     参数解析器.add_argument("--下一步动作")
     参数解析器.add_argument("--下一步日期")
@@ -130,7 +129,6 @@ def 构建请求体(参数: argparse.Namespace) -> dict:
         "上次沟通摘要": 参数.上次沟通摘要,
         "客户想法": 参数.客户想法,
         "预计推进天数": 参数.预计推进天数,
-        "推进目标": 参数.推进目标,
         "内部负责人": 参数.内部负责人,
         "下一步动作": 参数.下一步动作,
         "下一步日期": 参数.下一步日期,
