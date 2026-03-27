@@ -117,14 +117,14 @@ def 构建参数解析器() -> argparse.ArgumentParser:
     设置令牌解析器 = 子命令解析器.add_parser("设置令牌", help="写入 long_term_token 到 config.json")
     设置令牌解析器.add_argument("long_term_token", nargs="?", help="可选：长效令牌；不传则交互输入")
 
-    机会新增解析器 = 子命令解析器.add_parser("机会新增", aliases=["新增"], help="新增合作机会")
+    机会新增解析器 = 子命令解析器.add_parser("机会新增", help="新增合作机会")
     添加机会字段(机会新增解析器)
     for 必填参数 in ["--客户名称", "--线索来源", "--当前阶段", "--下一步动作", "--下一步日期"]:
         for 动作 in 机会新增解析器._actions:
             if 必填参数 in 动作.option_strings:
                 动作.required = True
 
-    机会更新解析器 = 子命令解析器.add_parser("机会更新", aliases=["更新"], help="更新合作机会")
+    机会更新解析器 = 子命令解析器.add_parser("机会更新", help="更新合作机会")
     机会更新解析器.add_argument("--机会编号", required=True)
     机会更新解析器.add_argument("--自动评级", action="store_true")
     添加机会字段(机会更新解析器)
@@ -132,7 +132,7 @@ def 构建参数解析器() -> argparse.ArgumentParser:
     机会删除解析器 = 子命令解析器.add_parser("机会删除", help="删除合作机会")
     机会删除解析器.add_argument("--机会编号", required=True)
 
-    机会跟进解析器 = 子命令解析器.add_parser("机会跟进", aliases=["跟进"], help="记录合作机会跟进")
+    机会跟进解析器 = 子命令解析器.add_parser("机会跟进", help="记录合作机会跟进")
     机会跟进解析器.add_argument("--机会编号", required=True)
     机会跟进解析器.add_argument("--记录内容", required=True)
     机会跟进解析器.add_argument("--跟进结果")
@@ -145,7 +145,7 @@ def 构建参数解析器() -> argparse.ArgumentParser:
     机会跟进解析器.add_argument("--上次沟通摘要")
     机会跟进解析器.add_argument("--客户想法")
 
-    机会列表解析器 = 子命令解析器.add_parser("机会列表", aliases=["列表"], help="查看合作机会列表")
+    机会列表解析器 = 子命令解析器.add_parser("机会列表", help="查看合作机会列表")
     机会列表解析器.add_argument("--机会编号")
     机会列表解析器.add_argument("--搜索关键词")
     机会列表解析器.add_argument("--当前阶段")
@@ -160,7 +160,7 @@ def 构建参数解析器() -> argparse.ArgumentParser:
     机会列表解析器.add_argument("--每页数量", type=int, default=20)
     机会列表解析器.add_argument("--输出JSON", action="store_true")
 
-    机会详情解析器 = 子命令解析器.add_parser("机会详情", aliases=["详情"], help="查看合作机会详情")
+    机会详情解析器 = 子命令解析器.add_parser("机会详情", help="查看合作机会详情")
     机会详情解析器.add_argument("--机会编号", required=True)
 
     客户新增解析器 = 子命令解析器.add_parser("客户新增", help="新增客户")
@@ -313,11 +313,11 @@ def 主程序() -> None:
     try:
         客户端 = 销售系统接口客户端()
 
-        if 参数.命令 in {"机会新增", "新增"}:
+        if 参数.命令 == "机会新增":
             print(json.dumps(客户端.创建合作机会(构建请求体(参数, 机会字段列表)), ensure_ascii=False, indent=2))
             return
 
-        if 参数.命令 in {"机会更新", "更新"}:
+        if 参数.命令 == "机会更新":
             请求体 = 构建请求体(参数, 机会字段列表)
             if 参数.自动评级:
                 请求体["自动评级"] = True
@@ -328,12 +328,12 @@ def 主程序() -> None:
             print(json.dumps(客户端.删除合作机会(参数.机会编号), ensure_ascii=False, indent=2))
             return
 
-        if 参数.命令 in {"机会跟进", "跟进"}:
+        if 参数.命令 == "机会跟进":
             跟进字段 = ["记录内容", "跟进结果", "沟通方式", "预约时间", "当前阶段", "优先级", "下一步动作", "下一步日期", "上次沟通摘要", "客户想法"]
             print(json.dumps(客户端.新增跟进记录(参数.机会编号, 构建请求体(参数, 跟进字段)), ensure_ascii=False, indent=2))
             return
 
-        if 参数.命令 in {"机会列表", "列表"}:
+        if 参数.命令 == "机会列表":
             查询结果 = 客户端.查询合作机会列表(构建请求体(参数, 机会列表查询字段))
             if 参数.输出JSON:
                 print(json.dumps(查询结果, ensure_ascii=False, indent=2))
@@ -341,7 +341,7 @@ def 主程序() -> None:
             输出分页结果(查询结果, 生成机会简要行)
             return
 
-        if 参数.命令 in {"机会详情", "详情"}:
+        if 参数.命令 == "机会详情":
             print(json.dumps(客户端.查询合作机会详情(参数.机会编号), ensure_ascii=False, indent=2))
             return
 

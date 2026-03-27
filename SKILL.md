@@ -44,7 +44,7 @@ The security principle is simple:
 4. If the user wants the lead stored, run:
 
 ```bash
-python scripts/crm_tracker.py 新增 --客户名称 "Acme" --联系人姓名 "Li Wei" --联系角色 "CMO" --线索来源 "Expo" --当前阶段 "first-chat" --优先级 "A" --下一步动作 "发送1分钟演示并锁定会议" --下一步日期 2026-03-28
+python scripts/crm_tracker.py 机会新增 --客户名称 "Acme" --联系人姓名 "Li Wei" --联系角色 "CMO" --线索来源 "Expo" --当前阶段 "first-chat" --优先级 "A" --下一步动作 "发送1分钟演示并锁定会议" --下一步日期 2026-03-28
 ```
 
 5. Reply with:
@@ -90,8 +90,8 @@ Examples:
 
 ```bash
 python scripts/crm_tracker.py 汇总
-python scripts/crm_tracker.py 列表 --下一步日期 2026-03-27
-python scripts/crm_tracker.py 列表 --优先级 A --仅看活跃
+python scripts/crm_tracker.py 机会列表 --下一步日期 2026-03-27
+python scripts/crm_tracker.py 机会列表 --优先级 A --仅看活跃
 ```
 
 When reporting pipeline status, always include:
@@ -121,6 +121,8 @@ When reporting pipeline status, always include:
 ## Use the CRM Script
 
 The CRM script stores data in the backend `销售系统` schema through API calls authenticated by a long-term token.
+
+Use explicit command names. Do not use generic short aliases like `新增/更新/列表/详情`, to avoid accidentally calling the opportunity API when the task is customer or contact CRUD.
 
 Common commands (full CRUD):
 
