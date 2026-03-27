@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """销售系统后端接口客户端。"""
 
 from __future__ import annotations
@@ -57,53 +57,56 @@ class 销售系统接口客户端:
     def 创建合作机会(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities", 请求体=请求体)
 
-    def 更新合作机会(self, 机会编号: str, 请求体: dict[str, Any]) -> dict[str, Any]:
-        return self._发送请求("/sales-system/opportunities/update", 请求体={"机会编号": 机会编号, **请求体})
+    def 更新合作机会(self, 合作机会id: str, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/opportunities/update", 请求体={"合作机会id": 合作机会id, **请求体})
 
-    def 删除合作机会(self, 机会编号: str) -> dict[str, Any]:
-        return self._发送请求("/sales-system/opportunities/delete", 请求体={"机会编号": 机会编号})
+    def 删除合作机会(self, 合作机会id: str) -> dict[str, Any]:
+        return self._发送请求("/sales-system/opportunities/delete", 请求体={"合作机会id": 合作机会id})
 
-    def 新增跟进记录(self, 机会编号: str, 请求体: dict[str, Any]) -> dict[str, Any]:
-        return self._发送请求("/sales-system/opportunities/touch", 请求体={"机会编号": 机会编号, **请求体})
+    def 新增跟进记录(self, 合作机会id: str, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/opportunities/touch", 请求体={"合作机会id": 合作机会id, **请求体})
 
     def 查询合作机会列表(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities/query", 请求体=请求体)
 
-    def 查询合作机会详情(self, 机会编号: str) -> dict[str, Any]:
-        return self._发送请求("/sales-system/opportunities/detail", 请求体={"机会编号": 机会编号})
+    def 查询合作机会详情(self, 合作机会id: str) -> dict[str, Any]:
+        return self._发送请求("/sales-system/opportunities/detail", 请求体={"合作机会id": 合作机会id})
 
     def 创建客户(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/customers", 请求体=请求体)
 
-    def 更新客户(self, 客户编号: str, 请求体: dict[str, Any]) -> dict[str, Any]:
-        return self._发送请求("/sales-system/customers/update", 请求体={"客户编号": 客户编号, **请求体})
+    def 更新客户(self, 客户id: str, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/customers/update", 请求体={"客户id": 客户id, **请求体})
 
-    def 删除客户(self, 客户编号: str) -> dict[str, Any]:
-        return self._发送请求("/sales-system/customers/delete", 请求体={"客户编号": 客户编号})
+    def 删除客户(self, 客户id: str) -> dict[str, Any]:
+        return self._发送请求("/sales-system/customers/delete", 请求体={"客户id": 客户id})
 
     def 查询客户列表(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/customers/query", 请求体=请求体)
 
-    def 查询客户详情(self, 客户编号: str) -> dict[str, Any]:
-        return self._发送请求("/sales-system/customers/detail", 请求体={"客户编号": 客户编号})
+    def 查询客户详情(self, 客户id: str) -> dict[str, Any]:
+        return self._发送请求("/sales-system/customers/detail", 请求体={"客户id": 客户id})
 
     def 创建联系人(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/contacts", 请求体=请求体)
 
-    def 更新联系人(self, 联系人编号: int, 请求体: dict[str, Any]) -> dict[str, Any]:
-        return self._发送请求("/sales-system/contacts/update", 请求体={"联系人编号": 联系人编号, **请求体})
+    def 更新联系人(self, 联系人id: int, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/contacts/update", 请求体={"联系人id": 联系人id, **请求体})
 
-    def 删除联系人(self, 联系人编号: int) -> dict[str, Any]:
-        return self._发送请求("/sales-system/contacts/delete", 请求体={"联系人编号": 联系人编号})
+    def 删除联系人(self, 联系人id: int) -> dict[str, Any]:
+        return self._发送请求("/sales-system/contacts/delete", 请求体={"联系人id": 联系人id})
 
     def 查询联系人列表(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/contacts/query", 请求体=请求体)
 
-    def 查询联系人详情(self, 联系人编号: int) -> dict[str, Any]:
-        return self._发送请求("/sales-system/contacts/detail", 请求体={"联系人编号": 联系人编号})
+    def 查询联系人详情(self, 联系人id: int) -> dict[str, Any]:
+        return self._发送请求("/sales-system/contacts/detail", 请求体={"联系人id": 联系人id})
 
     def 查询销售汇总(self, *, 今日: str | None = None) -> dict[str, Any]:
         return self._发送请求("/sales-system/summary", 请求体={"今日": 今日})
 
     def 查询销售看板(self, *, 当前阶段: str | None = None, 优先级: str | None = None) -> dict[str, Any]:
         return self._发送请求("/sales-system/dashboard", 请求体={"当前阶段": 当前阶段, "优先级": 优先级})
+
+
+
