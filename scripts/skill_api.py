@@ -48,10 +48,15 @@ class 销售系统接口客户端:
             try:
                 结果 = json.loads(响应文本)
             except json.JSONDecodeError as error:
-                raise RuntimeError(f"后端请求失败: HTTP {exc.code}") from error
+                raise RuntimeError(f"后端请求失败: HTTP {exc.code}，响应={响应文本[:300]}") from error
 
         if 结果.get("status") != 100:
-            raise RuntimeError(结果.get("message") or "后端请求失败")
+            状态码 = 结果.get("status")
+            消息 = str(结果.get("message") or "后端请求失败")
+            详情 = 结果.get("data")
+            if 详情 not in (None, "", [], {}):
+                raise RuntimeError(f"{消息}（status={状态码}，data={json.dumps(详情, ensure_ascii=False)}）")
+            raise RuntimeError(f"{消息}（status={状态码}）")
         return 结果.get("data", {})
 
     def 创建合作机会(self, 请求体: dict[str, Any]) -> dict[str, Any]:
