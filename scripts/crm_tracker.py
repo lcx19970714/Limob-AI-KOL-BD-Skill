@@ -34,8 +34,24 @@ from 日期工具 import 标准化参数日期字段
     "备注",
 ]
 
+线索新增字段列表 = ["联系方式", "联系方式类型", "线索来源", "名称", "备注", "是否公开"]
+线索列表查询字段 = ["关键词", "线索来源", "销售线索状态", "页码", "每页数量"]
+线索转化字段列表 = [
+    "线索id",
+    "客户id",
+    "客户名称",
+    "产品类目",
+    "联系人姓名",
+    "联系角色",
+    "是否决策人",
+    "决策关系说明",
+    "核心痛点",
+    "客户想法",
+    "备注",
+]
 客户字段列表 = ["客户名称", "产品类目", "团队规模", "当前合作方式", "月建联量", "采购主体"]
 联系人字段列表 = ["客户id", "联系人姓名", "微信号", "手机号", "联系角色", "是否决策人", "决策关系说明"]
+记录联系人字段列表 = ["客户id", "客户名称", "产品类目", "采购主体", "联系人姓名", "微信号", "手机号", "联系角色", "是否决策人", "决策关系说明"]
 
 机会列表查询字段 = [
     "合作机会id",
@@ -97,6 +113,19 @@ def 添加联系人字段(参数解析器: argparse.ArgumentParser) -> None:
     参数解析器.add_argument("--决策关系说明")
 
 
+def 添加记录联系人字段(参数解析器: argparse.ArgumentParser) -> None:
+    参数解析器.add_argument("--客户id", type=int)
+    参数解析器.add_argument("--客户名称")
+    参数解析器.add_argument("--产品类目")
+    参数解析器.add_argument("--采购主体")
+    参数解析器.add_argument("--联系人姓名")
+    参数解析器.add_argument("--微信号")
+    参数解析器.add_argument("--手机号")
+    参数解析器.add_argument("--联系角色")
+    参数解析器.add_argument("--是否决策人")
+    参数解析器.add_argument("--决策关系说明")
+
+
 def 构建参数解析器() -> argparse.ArgumentParser:
     参数解析器 = argparse.ArgumentParser(description="销售系统命令行工具")
     参数解析器.set_defaults(今日=None, 输出JSON=False)
@@ -104,6 +133,46 @@ def 构建参数解析器() -> argparse.ArgumentParser:
 
     设置令牌解析器 = 子命令解析器.add_parser("设置令牌", help="写入 long_term_token 到 config.json")
     设置令牌解析器.add_argument("long_term_token", nargs="?", help="可选：长效令牌；不传则交互输入")
+
+    线索列表解析器 = 子命令解析器.add_parser("线索列表", help="查看销售线索列表")
+    线索列表解析器.add_argument("--关键词")
+    线索列表解析器.add_argument("--线索来源")
+    线索列表解析器.add_argument("--销售线索状态", default="待转化")
+    线索列表解析器.add_argument("--页码", type=int, default=1)
+    线索列表解析器.add_argument("--每页数量", type=int, default=20)
+    线索列表解析器.add_argument("--输出JSON", action="store_true")
+
+    线索新增解析器 = 子命令解析器.add_parser("线索新增", help="新增销售线索")
+    线索新增解析器.add_argument("--联系方式", required=True)
+    线索新增解析器.add_argument("--联系方式类型", default="微信")
+    线索新增解析器.add_argument("--线索来源", default="手动导入")
+    线索新增解析器.add_argument("--名称")
+    线索新增解析器.add_argument("--备注")
+    线索新增解析器.add_argument("--是否公开")
+
+    线索转化解析器 = 子命令解析器.add_parser("线索转化", help="转化销售线索为客户、联系人和合作机会")
+    线索转化解析器.add_argument("--线索id", required=True, type=int)
+    线索转化解析器.add_argument("--客户id", type=int)
+    线索转化解析器.add_argument("--客户名称")
+    线索转化解析器.add_argument("--产品类目")
+    线索转化解析器.add_argument("--联系人姓名")
+    线索转化解析器.add_argument("--联系角色")
+    线索转化解析器.add_argument("--是否决策人")
+    线索转化解析器.add_argument("--决策关系说明")
+    线索转化解析器.add_argument("--核心痛点")
+    线索转化解析器.add_argument("--客户想法")
+    线索转化解析器.add_argument("--备注")
+
+    线索排除解析器 = 子命令解析器.add_parser("线索排除", help="标记销售线索为已排除")
+    线索排除解析器.add_argument("--线索id", required=True, type=int)
+    线索排除解析器.add_argument("--排除原因")
+
+    线索批量排除解析器 = 子命令解析器.add_parser("线索批量排除", help="批量标记销售线索为已排除")
+    线索批量排除解析器.add_argument("--线索ids", required=True, help="多个线索id，用英文逗号分隔")
+    线索批量排除解析器.add_argument("--排除原因")
+
+    线索删除解析器 = 子命令解析器.add_parser("线索删除", help="管理员物理删除销售线索")
+    线索删除解析器.add_argument("--线索id", required=True, type=int)
 
     机会新增解析器 = 子命令解析器.add_parser("机会新增", help="新增合作机会")
     添加机会字段(机会新增解析器)
@@ -184,6 +253,9 @@ def 构建参数解析器() -> argparse.ArgumentParser:
             if 必填参数 in 动作.option_strings:
                 动作.required = True
 
+    记录联系人解析器 = 子命令解析器.add_parser("联系人记录", help="按客户主体和联系方式记录销售联系人")
+    添加记录联系人字段(记录联系人解析器)
+
     联系人更新解析器 = 子命令解析器.add_parser("联系人更新", help="更新联系人")
     联系人更新解析器.add_argument("--联系人id", required=True, type=int)
     添加联系人字段(联系人更新解析器)
@@ -230,6 +302,14 @@ def 生成机会简要行(记录: dict[str, Any]) -> str:
         f"{记录.get('合作机会id', '')} | {记录.get('客户名称', '')} | "
         f"{记录.get('当前阶段名称') or 记录.get('当前阶段', '')} | "
         f"{记录.get('优先级', '')} | {记录.get('下一步动作', '')} | {记录.get('下一步日期', '')}"
+    )
+
+
+def 生成线索简要行(记录: dict[str, Any]) -> str:
+    return (
+        f"{记录.get('线索id', '')} | {记录.get('线索名称', '')} | "
+        f"{记录.get('联系方式') or 记录.get('联系方式简略') or '-'} | "
+        f"{记录.get('线索来源', '')} | {记录.get('销售线索状态', '')}"
     )
 
 
@@ -322,6 +402,35 @@ def 主程序() -> None:
     try:
         客户端 = 销售系统接口客户端()
 
+        if 参数.命令 == "线索列表":
+            查询结果 = 客户端.查询销售线索列表(构建请求体(参数, 线索列表查询字段))
+            if 参数.输出JSON:
+                print(json.dumps(查询结果, ensure_ascii=False, indent=2))
+                return
+            输出分页结果(查询结果, 生成线索简要行)
+            return
+
+        if 参数.命令 == "线索新增":
+            print(json.dumps(客户端.创建销售线索(构建请求体(参数, 线索新增字段列表)), ensure_ascii=False, indent=2))
+            return
+
+        if 参数.命令 == "线索转化":
+            print(json.dumps(客户端.转化销售线索(构建请求体(参数, 线索转化字段列表)), ensure_ascii=False, indent=2))
+            return
+
+        if 参数.命令 == "线索排除":
+            print(json.dumps(客户端.排除销售线索(参数.线索id, getattr(参数, "排除原因", None)), ensure_ascii=False, indent=2))
+            return
+
+        if 参数.命令 == "线索批量排除":
+            线索id列表 = [int(item.strip()) for item in str(参数.线索ids).split(",") if item.strip()]
+            print(json.dumps(客户端.批量排除销售线索(线索id列表, getattr(参数, "排除原因", None)), ensure_ascii=False, indent=2))
+            return
+
+        if 参数.命令 == "线索删除":
+            print(json.dumps(客户端.删除销售线索(参数.线索id), ensure_ascii=False, indent=2))
+            return
+
         if 参数.命令 == "机会新增":
             print(json.dumps(客户端.创建合作机会(构建请求体(参数, 机会字段列表)), ensure_ascii=False, indent=2))
             return
@@ -380,6 +489,10 @@ def 主程序() -> None:
 
         if 参数.命令 == "联系人新增":
             print(json.dumps(客户端.创建联系人(构建请求体(参数, 联系人字段列表)), ensure_ascii=False, indent=2))
+            return
+
+        if 参数.命令 == "联系人记录":
+            print(json.dumps(客户端.记录销售联系人(构建请求体(参数, 记录联系人字段列表)), ensure_ascii=False, indent=2))
             return
 
         if 参数.命令 == "联系人更新":

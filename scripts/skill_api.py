@@ -59,6 +59,27 @@ class 销售系统接口客户端:
             raise RuntimeError(f"{消息}（status={状态码}）")
         return 结果.get("data", {})
 
+    def 查询销售线索列表(self, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/leads/query", 请求体=请求体)
+
+    def 创建销售线索(self, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/leads", 请求体=请求体)
+
+    def 导入微信好友为销售线索(self, 微信好友表id: int) -> dict[str, Any]:
+        return self._发送请求("/sales-system/leads/import-wechat-friend", 请求体={"微信好友表id": 微信好友表id})
+
+    def 转化销售线索(self, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/leads/convert", 请求体=请求体)
+
+    def 排除销售线索(self, 线索id: int, 排除原因: str | None = None) -> dict[str, Any]:
+        return self._发送请求("/sales-system/leads/exclude", 请求体={"线索id": 线索id, "排除原因": 排除原因})
+
+    def 批量排除销售线索(self, 线索id列表: list[int], 排除原因: str | None = None) -> dict[str, Any]:
+        return self._发送请求("/sales-system/leads/batch-exclude", 请求体={"线索id列表": 线索id列表, "排除原因": 排除原因})
+
+    def 删除销售线索(self, 线索id: int) -> dict[str, Any]:
+        return self._发送请求("/sales-system/leads/delete", 请求体={"线索id": 线索id})
+
     def 创建合作机会(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/opportunities", 请求体=请求体)
 
@@ -94,6 +115,9 @@ class 销售系统接口客户端:
 
     def 创建联系人(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/contacts", 请求体=请求体)
+
+    def 记录销售联系人(self, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/contacts/record", 请求体=请求体)
 
     def 更新联系人(self, 联系人id: int, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/contacts/update", 请求体={"联系人id": 联系人id, **请求体})
