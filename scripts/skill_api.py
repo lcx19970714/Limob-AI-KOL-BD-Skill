@@ -119,6 +119,12 @@ class 销售系统接口客户端:
     def 记录销售联系人(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/contacts/record", 请求体=请求体)
 
+    def 补充联系人联系方式(self, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/contacts/contact-method", 请求体=请求体)
+
+    def 删除联系人联系方式(self, 请求体: dict[str, Any]) -> dict[str, Any]:
+        return self._发送请求("/sales-system/contacts/contact-method/delete", 请求体=请求体)
+
     def 更新联系人(self, 联系人id: int, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/contacts/update", 请求体={"联系人id": 联系人id, **请求体})
 
@@ -128,8 +134,8 @@ class 销售系统接口客户端:
     def 查询联系人列表(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/contacts/query", 请求体=请求体)
 
-    def 查询联系人详情(self, 联系人id: int) -> dict[str, Any]:
-        return self._发送请求("/sales-system/contacts/detail", 请求体={"联系人id": 联系人id})
+    def 查询联系人详情(self, 联系人uuid: str) -> dict[str, Any]:
+        return self._发送请求("/sales-system/contacts/detail", 请求体={"联系人uuid": 联系人uuid})
 
     def 查询销售汇总(self, *, 今日: str | None = None) -> dict[str, Any]:
         return self._发送请求("/sales-system/summary", 请求体={"今日": 今日})

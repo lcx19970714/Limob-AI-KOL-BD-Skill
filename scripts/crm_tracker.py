@@ -52,6 +52,7 @@ from 日期工具 import 标准化参数日期字段
 客户字段列表 = ["客户名称", "产品类目", "团队规模", "当前合作方式", "月建联量", "采购主体"]
 联系人字段列表 = ["客户id", "联系人姓名", "微信号", "手机号", "联系角色", "是否决策人", "决策关系说明"]
 记录联系人字段列表 = ["客户id", "客户名称", "产品类目", "采购主体", "联系人姓名", "微信号", "手机号", "联系角色", "是否决策人", "决策关系说明"]
+联系人联系方式字段列表 = ["联系人uuid", "联系方式", "联系方式类型"]
 
 机会列表查询字段 = [
     "合作机会id",
@@ -256,6 +257,15 @@ def 构建参数解析器() -> argparse.ArgumentParser:
     记录联系人解析器 = 子命令解析器.add_parser("联系人记录", help="按客户主体和联系方式记录销售联系人")
     添加记录联系人字段(记录联系人解析器)
 
+    补充联系人联系方式解析器 = 子命令解析器.add_parser("联系人联系方式新增", help="给联系人补充微信号或手机号")
+    补充联系人联系方式解析器.add_argument("--联系人uuid", required=True)
+    补充联系人联系方式解析器.add_argument("--联系方式", required=True)
+    补充联系人联系方式解析器.add_argument("--联系方式类型", default="微信")
+
+    删除联系人联系方式解析器 = 子命令解析器.add_parser("联系人联系方式删除", help="删除联系人名下的一条联系方式")
+    删除联系人联系方式解析器.add_argument("--联系人uuid", required=True)
+    删除联系人联系方式解析器.add_argument("--用户联系方式id", required=True, type=int)
+
     联系人更新解析器 = 子命令解析器.add_parser("联系人更新", help="更新联系人")
     联系人更新解析器.add_argument("--联系人id", required=True, type=int)
     添加联系人字段(联系人更新解析器)
@@ -264,7 +274,7 @@ def 构建参数解析器() -> argparse.ArgumentParser:
     联系人删除解析器.add_argument("--联系人id", required=True, type=int)
 
     联系人详情解析器 = 子命令解析器.add_parser("联系人详情", help="查看联系人详情")
-    联系人详情解析器.add_argument("--联系人id", required=True, type=int)
+    联系人详情解析器.add_argument("--联系人uuid", required=True)
 
     联系人列表解析器 = 子命令解析器.add_parser("联系人列表", help="查看联系人列表")
     联系人列表解析器.add_argument("--联系人id", type=int)
@@ -495,6 +505,14 @@ def 主程序() -> None:
             print(json.dumps(客户端.记录销售联系人(构建请求体(参数, 记录联系人字段列表)), ensure_ascii=False, indent=2))
             return
 
+        if 参数.命令 == "联系人联系方式新增":
+            print(json.dumps(客户端.补充联系人联系方式(构建请求体(参数, 联系人联系方式字段列表)), ensure_ascii=False, indent=2))
+            return
+
+        if 参数.命令 == "联系人联系方式删除":
+            print(json.dumps(客户端.删除联系人联系方式({"联系人uuid": 参数.联系人uuid, "用户联系方式id": 参数.用户联系方式id}), ensure_ascii=False, indent=2))
+            return
+
         if 参数.命令 == "联系人更新":
             print(json.dumps(客户端.更新联系人(参数.联系人id, 构建请求体(参数, 联系人字段列表)), ensure_ascii=False, indent=2))
             return
@@ -504,7 +522,7 @@ def 主程序() -> None:
             return
 
         if 参数.命令 == "联系人详情":
-            print(json.dumps(客户端.查询联系人详情(参数.联系人id), ensure_ascii=False, indent=2))
+            print(json.dumps(客户端.查询联系人详情(参数.联系人uuid), ensure_ascii=False, indent=2))
             return
 
         if 参数.命令 == "联系人列表":
