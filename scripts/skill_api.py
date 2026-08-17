@@ -12,11 +12,11 @@ from skill_config import 加载技能配置
 
 
 class 销售系统接口客户端:
-    def __init__(self) -> None:
+    def __init__(self, long_term_token: str | None = None) -> None:
         配置 = 加载技能配置()
         self.base_url = str(配置["resolved_base_url"]).rstrip("/")
         self.timeout = float(配置.get("timeout_seconds", 20))
-        self.long_term_token = str(配置.get("long_term_token") or "")
+        self.long_term_token = str(long_term_token or 配置.get("long_term_token") or "")
 
     def _构建请求头(self) -> dict[str, str]:
         请求头 = {"Content-Type": "application/json"}
@@ -24,7 +24,13 @@ class 销售系统接口客户端:
             请求头["Authorization"] = f"Bearer {self.long_term_token}"
         return 请求头
 
-    def _发送请求(self, 路径: str, *, 请求体: dict[str, Any] | None = None) -> dict[str, Any]:
+    def _发送请求(
+        self,
+        路径: str,
+        *,
+        请求体: dict[str, Any] | None = None,
+        方法: str = "POST",
+    ) -> dict[str, Any]:
         if not self.long_term_token:
             raise RuntimeError("未配置 long_term_token，请先让用户提供长效令牌并写入 config.json")
 
@@ -37,7 +43,7 @@ class 销售系统接口客户端:
             url=请求地址,
             data=请求数据,
             headers=self._构建请求头(),
-            method="POST",
+            method=方法,
         )
 
         try:
@@ -58,6 +64,10 @@ class 销售系统接口客户端:
                 raise RuntimeError(f"{消息}（status={状态码}，data={json.dumps(详情, ensure_ascii=False)}）")
             raise RuntimeError(f"{消息}（status={状态码}）")
         return 结果.get("data", {})
+
+    def 查询当前团队(self) -> dict[str, Any]:
+        """验证长效令牌，并确认其绑定的团队仍存在。"""
+        return self._发送请求("/user/current-team", 方法="GET")
 
     def 查询销售线索列表(self, 请求体: dict[str, Any]) -> dict[str, Any]:
         return self._发送请求("/sales-system/leads/query", 请求体=请求体)

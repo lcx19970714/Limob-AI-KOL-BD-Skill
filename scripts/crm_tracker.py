@@ -358,6 +358,14 @@ def 获取并校验令牌(参数令牌: str | None) -> str:
     return 输入令牌
 
 
+def 验证并保存长效令牌(令牌: str) -> dict[str, Any]:
+    """仅在令牌及其绑定团队都有效时持久化。"""
+    客户端 = 销售系统接口客户端(long_term_token=令牌)
+    团队信息 = 客户端.查询当前团队()
+    写入长效令牌(令牌)
+    return 团队信息
+
+
 def 处理客户名称占位(参数: argparse.Namespace) -> None:
     if 参数.命令 != "客户新增":
         return
@@ -401,10 +409,11 @@ def 主程序() -> None:
     if 参数.命令 == "设置令牌":
         try:
             令牌 = 获取并校验令牌(参数.long_term_token)
-        except ValueError as 异常:
+            团队信息 = 验证并保存长效令牌(令牌)
+        except (RuntimeError, ValueError) as 异常:
             raise SystemExit(str(异常)) from 异常
-        写入长效令牌(令牌)
-        print("long_term_token 已写入 config.json")
+        团队名称 = 团队信息.get("团队名称") or 团队信息.get("当前团队id") or "已绑定团队"
+        print(f"long_term_token 已验证并保存；当前团队：{团队名称}")
         return
 
     处理客户名称占位(参数)
